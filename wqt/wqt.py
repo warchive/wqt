@@ -10,7 +10,7 @@ from command import creation, handle
 
 
 def parse():
-    """Adds command line arguments and returns the options"""
+    """adds command line arguments and returns the options"""
 
     parser = argparse.ArgumentParser(description='WQt creates and builds Qt projects through CMake')
 
@@ -30,7 +30,7 @@ def parse():
 
 
 def provided(*args):
-    """checks if give flags are specified during command line usage"""
+    """checks if given flags are specified during command line usage"""
 
     if any(flag is not None for flag in args):
         return True
@@ -57,8 +57,8 @@ def main():
         handle.build(path)
     elif options.action == "listqml":
         handle.listqml(path)
-    elif options.action == "showqml":
-        handle.showqml(path, name)
+    elif options.action == "previewqml":
+        handle.previewqml(path, name)
 
 
 if __name__ == '__main__':

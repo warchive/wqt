@@ -8,6 +8,8 @@ set(PROJECT_NAME {{name-project}})
 project(${PROJECT_NAME})
 set(CMAKE_CXX_STANDARD {{version-c++}})
 add_definitions(-I/${CMAKE_CURRENT_SOURCE_DIR}/toolchain/helper)
+add_definitions(-I/${CMAKE_CURRENT_SOURCE_DIR}/src)
+add_definitions(-I/${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
 # project directories
 set(ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
