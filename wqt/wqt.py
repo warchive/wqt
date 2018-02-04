@@ -48,6 +48,8 @@ def provided(*args):
 
 
 def verify_qt_application(name):
+    """verifies if the type of Qt application is supported"""
+
     if name != 'quick' and name != 'widgets' and name != 'console':
         writeln('Invalid Qt application specified', color=Fore.RED)
         quit(2)
@@ -57,7 +59,6 @@ def main():
     options = parse()
 
     path = None
-    name = None
     cmake = options.cmake
     make = options.make
     generator = options.generator
@@ -81,14 +82,28 @@ def main():
         handle.clean(path)
     elif 'list-types' in options.action:
         handle.list_types()
-    elif options.action == 'add-lib':
-        handle.add_lib(path)
-    elif options.action == 'rem-lib':
-        handle.rem_lib(path)
-    elif options.action == 'list-qml':
+    elif 'add-lib' in options.action:
+        if len(options.action) < 2:
+            writeln('Specify the name of the library to add', color=Fore.RED)
+            quit(2)
+
+        handle.add_lib(path, options.action[1])
+    elif 'rm-lib' in options.action:
+        if len(options.action) < 2:
+            writeln('Specify the name of the library to remove', color=Fore.RED)
+            quit(2)
+
+        handle.rm_lib(path, options.action[1])
+    elif 'run' in options.action:
+        handle.run(path, generator, cmake, make)
+    elif 'list-qml' in options.action:
         handle.list_qml(path)
-    elif options.action == 'preview-qml':
-        handle.preview_qml(path, name)
+    elif 'preview-qml' in options.action:
+        if len(options.action) < 2:
+            writeln('Specify the name of the qml file to preview', color=Fore.RED)
+            quit(2)
+
+        handle.preview_qml(path, options.action[1])
 
 
 if __name__ == '__main__':

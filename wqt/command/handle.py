@@ -5,6 +5,10 @@ Handle building, listing, and showing WQt projects
 import os
 import subprocess
 import shutil
+import json
+import sys
+
+from collections import OrderedDict
 
 from utils.helper import (
     create_folder,
@@ -21,7 +25,23 @@ from utils.finder import (
 )
 
 from utils.output import writeln, write
+from . import creation
 from colorama import Fore
+
+
+def get_platform():
+    """Returns the operating system"""
+
+    platforms = {
+        'linux1': 'Linux',
+        'linux2': 'Linux',
+        'darwin': 'OS X',
+        'win32': 'Windows'
+    }
+    if sys.platform not in platforms:
+        return sys.platform
+
+    return platforms[sys.platform]
 
 
 def verify_path(path):
@@ -61,7 +81,7 @@ def build(path, generator=None, make=None, cmake=None):
             and os.path.exists(path + '/res'):
         if application == 'widgets' and os.path.exists(path + '/res/ui'):
             valid = True
-        elif application == 'quick' and os.path.exists(path + '/res/qt'):
+        elif application == 'quick' and os.path.exists(path + '/res/qml'):
             valid = True
 
     if valid:
@@ -163,16 +183,123 @@ def list_types():
 def add_lib(path, name):
     """add Qt library to the project"""
 
+    write('Adding library named ' + name + ' - ', color=Fore.CYAN)
+
+    # load config file as json
+    with open(path + '/config.json') as f:
+        config_data = json.load(f, object_pairs_hook=OrderedDict)
+
+    if not str(name) in config_data['libraries-qt']:
+        config_data['libraries-qt'].append(str(name))
+    else:
+        writeln('\nLibrary already exist, libraries are: ' + ' '.join(config_data['libraries-qt']),
+                color=Fore.YELLOW)
+        quit(2)
+
+    # write the project name to config file
+    with open(path + '/config.json', 'w') as f:
+        json.dump(config_data, f, indent=2)
+
+    writeln('done')
+    writeln('Libraries left are: ' + ' '.join(config_data['libraries-qt']), color=Fore.YELLOW)
+    writeln('Updating CMake files: ', color=Fore.CYAN)
+    creation.update(path)
+
 
 def rm_lib(path, name):
     """remove Qt library from the project"""
 
+    write('Removing library named ' + name + ' - ', color=Fore.CYAN)
+
+    # load config file as json
+    with open(path + '/config.json') as f:
+        config_data = json.load(f, object_pairs_hook=OrderedDict)
+
+    if str(name) in config_data['libraries-qt']:
+        config_data['libraries-qt'].remove(str(name))
+    else:
+        writeln('\nNo such library to remove, libraries are: ' + ' '.join(config_data['libraries-qt']),
+                color=Fore.YELLOW)
+        quit(2)
+
+    # write the project name to config file
+    with open(path + '/config.json', 'w') as f:
+        json.dump(config_data, f, indent=2)
+
+    writeln('done')
+    writeln('Libraries left are: ' + ' '.join(config_data['libraries-qt']), color=Fore.YELLOW)
+    writeln('Updating CMake files: ', color=Fore.CYAN)
+    creation.update(path)
+
+
+def run(path, generator=None, cmake=None, make=None):
+    """open the binary executable file"""
+
+    if path is None:
+        path = get_working_directory()
+    else:
+        path = linux_path(os.path.abspath(path))
+
+    verify_path(path)
+
+    build(path, generator, cmake, make)
+
+    with open(path + '/config.json') as f:
+        config_data = json.load(f)
+
+    executable = config_data['name-project']
+
+    write('Running the ' + executable + ' project', color=Fore.YELLOW)
+
+    if get_platform() == 'OS X':
+        subprocess.call(['open', path + '/bin/' + executable + '.app'])
+    elif get_platform() == 'Windows':
+        subprocess.call([path + '/bin/' + executable + '.exe'])
+    else:
+        subprocess.call([path + '/bin/' + executable])
+
 
 def list_qml(path):
     """list qml files in the project"""
-    pass
+
+    if path is None:
+        path = get_working_directory()
+    else:
+        path = linux_path(os.path.abspath(path))
+
+    verify_path(path)
+
+    if not os.path.exists(path + '/wqt/quick'):
+        writeln('This project is not a Qt Quick project so no qml files', color=Fore.YELLOW)
+        quit(2)
+
+    writeln('Qml files for this project: ', color=Fore.YELLOW)
+    files = get_files(path + '/res/qml')
+
+    for file in files:
+        if os.path.splitext(file)[1] == '.qml':
+            writeln(os.path.basename(file), color=Fore.CYAN)
 
 
 def preview_qml(path, name):
     """preview qml file"""
-    pass
+
+    if path is None:
+        path = get_working_directory()
+    else:
+        path = linux_path(os.path.abspath(path))
+
+    verify_path(path)
+
+    if not os.path.exists(path + '/wqt/quick'):
+        writeln('This project is not a Qt Quick project so no qml preview :(', color=Fore.YELLOW)
+        quit(2)
+
+    qml_path = ''
+
+    if os.path.exists(path + '/res/qml/' + name):
+        qml_path = path + '/res/qml/' + name
+    elif os.path.exists(path + '/res/qml/' + name + '.qml'):
+        qml_path = path + '/res/qml/' + name + '.qml'
+
+    subprocess.call(['qmlscene', qml_path])

@@ -1,6 +1,5 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
-#include <QDebug>
 #include <ResourceManager.h>
 
 int main(int argc, char *argv[]) {
@@ -11,7 +10,6 @@ int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
 
     auto literal = getResource("qml/main.qml");
-    qDebug << literal;
 
     QQmlApplicationEngine engine;
     engine.load(QUrl(literal));
