@@ -131,9 +131,6 @@ def create(path, application):
             writeln('\nThere is already a src/lib/res/cmake folder in this directory. Use wqt update instead',
                     color=Fore.RED)
             quit(2)
-        else:
-            writeln('\nDirectory is not empty, aborting ..', color=Fore.RED)
-            quit(2)
 
     create_folders(path, application, True)
     writeln('done')
