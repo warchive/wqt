@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION {{version-qt}})
+cmake_minimum_required(VERSION {{version-cmake}})
 
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/toolchain/cmake)
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 include(Functions)
 
 set(PROJECT_NAME {{name-project}})
@@ -33,7 +33,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${BIN_DIR})
 # qt
 set(QT_VERSION {{version-qt}})
 set(QT_MODULES {{libraries-qt}})
-find_package(Qt5 ${QT_VERSION} MIN CONFIG REQUIRED ${QT_MODULES})
+find_package(Qt5 ${QT_VERSION} QUIET CONFIG REQUIRED ${QT_MODULES})
 set(CMAKE_AUTOMOC true)
 
 # configure files

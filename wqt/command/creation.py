@@ -7,13 +7,17 @@ import os
 import sys
 from distutils.dir_util import copy_tree
 from shutil import copyfile
+from utils import cmake
+from collections import OrderedDict
 
 from colorama import Fore
 from utils.helper import (
     create_folder,
     linux_path,
     get_working_directory,
-    get_wqt_path
+    get_wqt_path,
+    get_files,
+    get_dirs
 
 )
 from utils.output import (
@@ -85,10 +89,23 @@ def create(path):
 
     verify_path(path)
 
+    project_name = os.path.basename(path)
+
     templates_path = linux_path(get_wqt_path() + '/templates')
     toolchain_path = linux_path(get_wqt_path() + '/toolchain')
 
     write('Creating Qt work environment - ', color=Fore.CYAN)
+
+    # check if there are files in the folder
+    if get_dirs(path) or get_files(path):
+        if os.path.exists(path + '/src') or os.path.exists(path + '/lib') or os.path.exists(path + '/res') or \
+                os.path.exists(path + '/cmake'):
+            writeln('\nThere is already a src/lib/res/cmake folder in this directory. Use wqt update instead',
+                    color=Fore.RED)
+            quit(2)
+        else:
+            writeln('\nDirectory is not empty, aborting ..', color=Fore.RED)
+            quit(2)
 
     create_folders(path, True)
     writeln('done')
@@ -97,15 +114,25 @@ def create(path):
     copy_tree(toolchain_path + '/cmake', path + "/cmake")
     copy_cmake_template_file(templates_path, path)
     copy_config_template_file(templates_path, path)
+    copyfile(templates_path + '/.gitignore.tpl', path + '/.gitignore')
+    copyfile(templates_path + '/app-README.md.tpl', path + '/src/app/README.md')
+    copyfile(templates_path + '/lib-README.md.tpl', path + '/lib/README.md')
     writeln('done')
 
     write('Applying configurations - ', color=Fore.CYAN)
+
     # load config file as json
-    with open(path + "/config.json") as f:
-        config_data = json.load(f)
+    with open(path + '/config.json') as f:
+        config_data = json.load(f, object_pairs_hook=OrderedDict)
+
+    config_data['name-project'] = project_name
+
+    # write the project name to config file
+    with open(path + '/config.json', 'w') as f:
+        json.dump(config_data, f, indent=2)
 
     # fill the template
-    # cmake.parse_update(path + "/CMakeLists.txt", config_data)
+    cmake.parse_update(path + "/CMakeLists.txt", config_data)
     writeln('done')
     writeln('Qt project created', color=Fore.YELLOW)
 

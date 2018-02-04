@@ -4,7 +4,6 @@ Helper functions to be used through the tool
 
 import os
 from os.path import abspath, dirname
-import re
 import shutil
 
 from six import string_types
@@ -48,14 +47,17 @@ def fill_template(string, data):
     """Fills the template based on the data provided"""
 
     string = string.replace('\\n', '\n').replace('\\t', '\t')
+
     for key in data:
-        value = ''
+        value = str(data[key])
+
         if isinstance(data[key], list):
             value = ' '.join(data[key])
         elif isinstance(data[key], string_types):
             value = data[key]
 
-        string = re.sub('{{' + key + '}}', value, string)
+        if '{{' + key + '}}' in string:
+            return string.replace('{{' + key + '}}', value)
 
     return string
 

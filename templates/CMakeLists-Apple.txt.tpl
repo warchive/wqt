@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.1.0)
+cmake_minimum_required(VERSION {{version-cmake}})
 
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/toolchain/cmake)
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 include(Functions)
 
 set(PROJECT_NAME {{name-project}})
@@ -37,13 +37,13 @@ set(VERSION_PATCH {{version-patch-app}})
 set(ORGANIZATION {{organication-app}})
 set(DOMAIN {{domain-app}})
 set(ICON_PATH ${ROOT_DIR}/res/icons)
-set(ICON_NAME {{name-icon}})
+set(ICON_NAME {{name-icon-executable}})
 
 # qt related stuff
 set(QT_VERSION {{version-qt}})
 set(QT_MODULES {{libraries-qt}}) # Core Gui Widgets Quick Qml Concurrent Network DBus PrintSupport)
 
-find_package(Qt5 ${QT_VERSION} MIN CONFIG REQUIRED ${QT_MODULES})
+find_package(Qt5 ${QT_VERSION} QUIET CONFIG REQUIRED ${QT_MODULES})
 set(CMAKE_AUTOMOC true)
 
 # configure files
@@ -69,7 +69,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(MACOSX_BUNDLE_BUNDLE_VERSION 1)
 set(MACOSX_BUNDLE_LONG_VERSION_STRING ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
 set(MACOSX_BUNDLE_SHORT_VERSION_STRING ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
-set(MACOSX_BUNDLE_ICON_FILE icon.icns)
+set(MACOSX_BUNDLE_ICON_FILE ${ICON_NAME})
 set(MACOSX_BUNDLE_BUNDLE_NAME ${PROJECT_NAME})
 set(MACOSX_BUNDLE_RESOURCES ${BIN_DIR}/${PROJECT_NAME}.app/Contents/Resources)
 set(MACOSX_BUNDLE_ICON ${ICON_PATH}/${MACOSX_BUNDLE_ICON_FILE})
