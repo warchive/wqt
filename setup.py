@@ -39,6 +39,7 @@ setup(
     },
     classifiers=[
         'Development Status :: 4 - Beta',
+        'License :: MIT'
     ],
     keywords=[
         'qt', 'c++', 'cmake', 'make', 'tool'

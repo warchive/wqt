@@ -40,10 +40,12 @@ def create_folders(project_path, application, override=False):
         create_folder(project_path + "/res/icons")
 
     if application == 'quick':
-        create_folder(project_path + '/res', override)
+        if not os.path.exists(project_path + '/res'):
+            create_folder(project_path + '/res', override)
         create_folder(project_path + '/res/qml', override)
     elif application == 'widgets':
-        create_folder(project_path + '/res', override)
+        if not os.path.exists(project_path + '/res'):
+            create_folder(project_path + '/res', override)
         create_folder(project_path + '/res/ui', override)
 
 
