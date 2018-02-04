@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION {{version-cmake}})
 
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/wqt/cmake)
 include(Functions)
 
 set(PROJECT_NAME {{name-project}})
 
 project(${PROJECT_NAME})
 set(CMAKE_CXX_STANDARD {{version-c++}})
-add_definitions(-I/${CMAKE_CURRENT_SOURCE_DIR}/toolchain/helper)
+add_definitions(-I/${CMAKE_CURRENT_SOURCE_DIR}/wqt/helper)
 add_definitions(-I/${CMAKE_CURRENT_SOURCE_DIR}/src)
 add_definitions(-I/${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
@@ -34,7 +34,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${BIN_DIR})
 set(VERSION_MAJOR {{version-major-app}})
 set(VERSION_MINOR {{version-minor-app}})
 set(VERSION_PATCH {{version-patch-app}})
-set(ORGANIZATION {{organication-app}})
+set(ORGANIZATION {{organization-app}})
 set(DOMAIN {{domain-app}})
 set(ICON_PATH ${ROOT_DIR}/res/icons)
 set(ICON_NAME {{name-icon-executable}})
@@ -45,10 +45,12 @@ set(QT_MODULES {{libraries-qt}}) # Core Gui Widgets Quick Qml Concurrent Network
 
 find_package(Qt5 ${QT_VERSION} QUIET CONFIG REQUIRED ${QT_MODULES})
 set(CMAKE_AUTOMOC true)
+set(CMAKE_AUTOUIC true)
+set(CMAKE_AUTOUIC_SEARCH_PATHS ${ROOT_DIR}/res/ui)
 
 # configure files
-configure_file(${ROOT_DIR}/cmake/meta.hpp.in ${BUILD_DIR}/meta.hpp)
-configure_file(${ROOT_DIR}/cmake/info.plist.in ${BUILD_DIR}/info.plist)
+configure_file(${ROOT_DIR}/wqt/cmake/meta.hpp.in ${BUILD_DIR}/meta.hpp)
+configure_file(${ROOT_DIR}/wqt/cmake/info.plist.in ${BUILD_DIR}/info.plist)
 
 # definitions
 add_definitions(${QT_DEFINITIONS})

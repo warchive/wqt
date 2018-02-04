@@ -1,4 +1,4 @@
-"""@package templates
+"""@package utils
 Parses and completes the cmake templates
 """
 

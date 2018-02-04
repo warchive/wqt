@@ -7,6 +7,8 @@ from __future__ import absolute_import
 import argparse
 
 from command import creation, handle
+from utils.output import writeln, write
+from colorama import Fore
 
 
 def parse():
@@ -16,15 +18,24 @@ def parse():
 
     parser.add_argument(
         'action',
-        help='action to perform (create, update, build, listqml, and showqml')
+        nargs='+',
+        help='action to perform (create, update, build, clean, list-types, add-lib, rm-lib, list_qml, and show_qml')
     parser.add_argument(
         '--path',
         help='path where the project is or will be created'
     )
     parser.add_argument(
-        '--name',
-        help='name of the qml file to be shown'
-    )
+        '--generator',
+        help='makefile generator to use for build (default: Unix Makefiles)',
+        type=str)
+    parser.add_argument(
+        '--make',
+        help='path to make binary',
+        type=str)
+    parser.add_argument(
+        '--cmake',
+        help='path to cmake binary',
+        type=str)
 
     return parser.parse_args()
 
@@ -36,29 +47,48 @@ def provided(*args):
         return True
 
 
+def verify_qt_application(name):
+    if name != 'quick' and name != 'widgets' and name != 'console':
+        writeln('Invalid Qt application specified', color=Fore.RED)
+        quit(2)
+
+
 def main():
     options = parse()
 
     path = None
     name = None
+    cmake = options.cmake
+    make = options.make
+    generator = options.generator
 
     if provided(options.path):
         path = str(options.path)
 
-    if provided(options.name):
-        name = str(options.name)
-
     # based on the action call scripts
-    if options.action == 'create':
-        creation.create(path)
-    elif options.action == "update":
+    if 'create' in options.action:
+        if len(options.action) < 2:
+            writeln('Specify a type of Qt application to create', color=Fore.RED)
+            quit(2)
+
+        verify_qt_application(options.action[1])
+        creation.create(path, options.action[1])
+    elif 'update' in options.action:
         creation.update(path)
-    elif options.action == "build":
-        handle.build(path)
-    elif options.action == "listqml":
-        handle.listqml(path)
-    elif options.action == "previewqml":
-        handle.previewqml(path, name)
+    elif 'build' in options.action:
+        handle.build(path, generator, cmake, make)
+    elif 'clean' in options.action:
+        handle.clean(path)
+    elif 'list-types' in options.action:
+        handle.list_types()
+    elif options.action == 'add-lib':
+        handle.add_lib(path)
+    elif options.action == 'rem-lib':
+        handle.rem_lib(path)
+    elif options.action == 'list-qml':
+        handle.list_qml(path)
+    elif options.action == 'preview-qml':
+        handle.preview_qml(path, name)
 
 
 if __name__ == '__main__':

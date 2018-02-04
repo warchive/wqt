@@ -1,4 +1,4 @@
-"""@package module
+"""@package utils
 Output is a wrapper over print to provide coloring and verbose mode
 """
 

@@ -1,4 +1,4 @@
-"""@package module
+"""@package utils
 Helper functions to be used through the tool
 """
 
