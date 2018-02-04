@@ -5,12 +5,12 @@ WQt is a Qt project management tool which allows the user to create, update, bui
 ## Prerequisites
 In order for this tool to work, the user needs to make sure the preequisites discussed below are met.
 
-* Install Qt for your machine
+* Install `Qt` for your machine
 * Add Qt's bin folder to the path
     * This will depend on the compiler you installed through Qt installer
     * Ex: `/usr/doge/applications/Qt/5.10.0/clang_64/bin`
-* Install CMake for your machine
-* Install Make and basic C/C++ tools
+* Install `CMake` for your machine
+* Install `Make` and basic `C/C++` tools
 
 
 ## Project Structure
@@ -39,9 +39,11 @@ project/
 Every project needs to have some way of configuring properties and this is why there is a `config.json` file in every `WQt` project. This file is very important because it contains critical information need to make the `build`, and `run` possible. This configuration file is different based on which machine the project is created on. Config files' templates are:
 
 **`Mac OS`** 
+
 ![config-mac](doc/screenshots/config_mac.png "Mac OS config")
 
 **`Windows and Linux`** 
+
 ![config-mac](doc/screenshots/config_others.png "Mac OS config")
 
 

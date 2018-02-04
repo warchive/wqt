@@ -12,15 +12,15 @@ Prerequisites
 In order for this tool to work, the user needs to make sure the
 preequisites discussed below are met.
 
--  Install Qt for your machine
+-  Install ``Qt`` for your machine
 -  Add Qt’s bin folder to the path
 
    -  This will depend on the compiler you installed through Qt
       installer
    -  Ex: ``/usr/doge/applications/Qt/5.10.0/clang_64/bin``
 
--  Install CMake for your machine
--  Install Make and basic C/C++ tools
+-  Install ``CMake`` for your machine
+-  Install ``Make`` and basic ``C/C++`` tools
 
 Project Structure
 -----------------
@@ -66,9 +66,19 @@ make the ``build``, and ``run`` possible. This configuration file is
 different based on which machine the project is created on. Config
 files’ templates are:
 
-**``Mac OS``** |config-mac|
+**Mac OS**
 
-**``Windows and Linux``** |config-mac|
+.. figure:: screenshots/config_mac.png
+   :alt: Mac OS config
+
+   config-mac
+
+**Windows and Linux**
+
+.. figure:: screenshots/config_others.png
+   :alt: Mac OS config
+
+   config-mac
 
 Looking at these configuration files, you can see that the fields are
 defined without user needed to change them. This is done because we
@@ -197,7 +207,3 @@ compatible with WQt. It will show the list of those application types.
 ::
 
     wqt list-types
-
-.. |config-mac| image:: doc/screenshots/config_mac.png
-.. |config-mac| image:: doc/screenshots/config_others.png
-
