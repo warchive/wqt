@@ -21,7 +21,7 @@ def package_files(directory):
 setup(
     setup_requires=['setuptools-markdown'],
     name='WQt',
-    version='1.0.1',
+    version='1.0.2',
     description='Create, Build, and Run Qt Projects',
     author='Deep Dhillon',
     author_email='deep@deepdhillon.ca',
