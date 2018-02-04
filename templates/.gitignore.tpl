@@ -68,7 +68,7 @@ CMakeLists.txt.user*
 
 # bin and build folder
 bin
-build
+wqt/build
 
 # mac files
 # General

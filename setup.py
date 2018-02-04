@@ -25,7 +25,7 @@ setup(
     author='Deep Dhillon',
     author_email='deep@deepdhillon.ca',
     url='https://github.com/dhillondeep/wqt',  # use the URL to the github repo
-    long_description=open('README.rst').read(),
+    long_description=open('doc/README.rst').read(),
     license='MIT',
     packages=find_packages(),
     install_requires=install_requires,
