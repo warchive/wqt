@@ -50,4 +50,5 @@ def memoized(func=None, watch=None):
     else:
         def wrapper(f):
             return _memoized(f, watch)
+
         return wrapper

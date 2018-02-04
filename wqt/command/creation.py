@@ -4,40 +4,27 @@ Handle creation, and update of WQt projects
 
 import json
 import os
-import sys
+from collections import OrderedDict
 from distutils.dir_util import copy_tree
 from shutil import copyfile
-from utils import cmake
-from collections import OrderedDict
 
 from colorama import Fore
-from utils.helper import (
+
+from wqt.utils import cmake
+from wqt.utils.helper import (
     create_folder,
     linux_path,
-    get_working_directory,
     get_wqt_path,
     get_files,
-    get_dirs
+    get_dirs,
+    get_valid_path,
+    get_platform,
+    get_qt_application
 )
-from utils.output import (
+from wqt.utils.output import (
     writeln,
     write
 )
-
-
-def get_platform():
-    """Returns the operating system"""
-
-    platforms = {
-        'linux1': 'Linux',
-        'linux2': 'Linux',
-        'darwin': 'OS X',
-        'win32': 'Windows'
-    }
-    if sys.platform not in platforms:
-        return sys.platform
-
-    return platforms[sys.platform]
 
 
 def create_folders(project_path, application, override=False):
@@ -46,16 +33,18 @@ def create_folders(project_path, application, override=False):
     create_folder(project_path + '/src', override)
     create_folder(project_path + '/src/app', override)
     create_folder(project_path + '/lib', override)
-    create_folder(project_path + '/res', override)
     create_folder(project_path + '/wqt', override)
 
     if get_platform() == 'OS X':
+        create_folder(project_path + "/res")
         create_folder(project_path + "/res/icons")
 
     if application == 'quick':
+        create_folder(project_path + '/res', override)
         create_folder(project_path + '/res/qml', override)
     elif application == 'widgets':
-            create_folder(project_path + '/res/ui', override)
+        create_folder(project_path + '/res', override)
+        create_folder(project_path + '/res/ui', override)
 
 
 def verify_path(path):
@@ -123,14 +112,10 @@ def copy_console_files(templates_path, path):
 def create(path, application):
     """Creates WQt project from scratch"""
 
-    if path is None:
-        path = get_working_directory()
-    else:
-        path = linux_path(os.path.abspath(path))
-
-    verify_path(path)
-
+    path = get_valid_path(path)
     project_name = os.path.basename(path)
+
+    writeln('Creating Qt ' + application + ' project', color=Fore.YELLOW)
 
     templates_path = linux_path(get_wqt_path() + '/templates')
     toolchain_path = linux_path(get_wqt_path() + '/toolchain')
@@ -195,23 +180,12 @@ def create(path, application):
 def update(path):
     """Updates existing WQt project"""
 
-    if path is None:
-        path = get_working_directory()
-    else:
-        path = linux_path(os.path.abspath(path))
-
-    verify_path(path)
+    path = get_valid_path(path)
 
     project_name = os.path.basename(path)
+    application = get_qt_application(path)
 
-    if os.path.exists(path + '/wqt/console'):
-        application = 'console'
-    elif os.path.exists(path + '/wqt/quick'):
-        application = 'quick'
-    elif os.path.exists(path + '/wqt/widgets'):
-        application = 'widgets'
-    else:
-        application = None
+    writeln('Updating Qt ' + application + ' project', color=Fore.YELLOW)
 
     templates_path = linux_path(get_wqt_path() + '/templates')
     toolchain_path = linux_path(get_wqt_path() + '/toolchain')

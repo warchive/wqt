@@ -2,86 +2,50 @@
 Handle building, listing, and showing WQt projects
 """
 
-import os
-import subprocess
-import shutil
 import json
-import sys
-
+import os
+import shutil
+import subprocess
 from collections import OrderedDict
 
-from utils.helper import (
-    create_folder,
-    linux_path,
-    get_working_directory,
-    get_wqt_path,
-    get_files,
-    get_dirs
-)
-from utils.finder import (
+from colorama import Fore
+
+from wqt.utils.finder import (
     get_cmake_program,
     get_generator_for,
     get_make_program,
+    get_qmlscene_program,
+    get_qmlviewer_program
 )
-
-from utils.output import writeln, write
+from wqt.utils.helper import (
+    get_files,
+    get_dirs,
+    get_valid_path,
+    get_platform,
+    get_qt_application
+)
+from wqt.utils.output import writeln, write
 from . import creation
-from colorama import Fore
-
-
-def get_platform():
-    """Returns the operating system"""
-
-    platforms = {
-        'linux1': 'Linux',
-        'linux2': 'Linux',
-        'darwin': 'OS X',
-        'win32': 'Windows'
-    }
-    if sys.platform not in platforms:
-        return sys.platform
-
-    return platforms[sys.platform]
-
-
-def verify_path(path):
-    """check if the project path is correct"""
-
-    if not os.path.exists(path) or not os.path.isdir(path):
-        writeln('Path specified for project creation does not exist or is not a directory', color=Fore.RED)
-        quit(2)
 
 
 def build(path, generator=None, make=None, cmake=None):
     """build WQt project"""
 
-    if path is None:
-        path = get_working_directory()
-    else:
-        path = linux_path(os.path.abspath(path))
+    path = get_valid_path(path)
 
-    verify_path(path)
+    writeln('WQt project build started', Fore.YELLOW)
+    write('Verifying project structure - ', Fore.CYAN)
 
-    writeln('WQt project build started', Fore.CYAN)
-
-    write('Verifying project structure', Fore.CYAN)
-
-    if os.path.exists(path + '/wqt/console'):
-        application = 'console'
-    elif os.path.exists(path + '/wqt/quick'):
-        application = 'quick'
-    elif os.path.exists(path + '/wqt/widgets'):
-        application = 'widgets'
-    else:
-        application = None
+    application = get_qt_application(path)
 
     valid = False
-
     if os.path.exists(path + '/wqt') and os.path.exists(path + '/src') and os.path.exists(path + '/src/app') \
             and os.path.exists(path + '/res'):
         if application == 'widgets' and os.path.exists(path + '/res/ui'):
             valid = True
         elif application == 'quick' and os.path.exists(path + '/res/qml'):
+            valid = True
+        elif application == 'console':
             valid = True
 
     if valid:
@@ -137,14 +101,7 @@ def build(path, generator=None, make=None, cmake=None):
 def clean(path):
     """clean WQt project's build folder"""
 
-    if path is None:
-        path = get_working_directory()
-    else:
-        path = linux_path(os.path.abspath(path))
-
-    verify_path(path)
-
-    path = str(path)
+    path = get_valid_path(path)
 
     # confirm if bin folder/path exists
     if not os.path.exists(path + '/wqt/build'):
@@ -167,21 +124,25 @@ def clean(path):
     shutil.rmtree(path + '/wqt/build')
 
     writeln('done')
-    writeln('Project build files cleaned')
+    writeln('Project build files cleaned', color=Fore.YELLOW)
 
 
 def list_types():
     """lists WQt application types supported"""
+
     writeln('Application types supported are: ', color=Fore.YELLOW)
     writeln('widgets', color=Fore.CYAN)
     writeln('quick', color=Fore.CYAN)
     writeln('console', color=Fore.CYAN)
+    writeln('#################################')
     write('Example usage: ', color=Fore.YELLOW)
-    writeln('wqt create widgets', color=Fore.CYAN)
+    writeln('wqt create widgets', color=Fore.YELLOW)
 
 
 def add_lib(path, name):
     """add Qt library to the project"""
+
+    path = get_valid_path(path)
 
     write('Adding library named ' + name + ' - ', color=Fore.CYAN)
 
@@ -202,12 +163,15 @@ def add_lib(path, name):
 
     writeln('done')
     writeln('Libraries left are: ' + ' '.join(config_data['libraries-qt']), color=Fore.YELLOW)
+    writeln('#################################################################################')
     writeln('Updating CMake files: ', color=Fore.CYAN)
     creation.update(path)
 
 
 def rm_lib(path, name):
     """remove Qt library from the project"""
+
+    path = get_valid_path(path)
 
     write('Removing library named ' + name + ' - ', color=Fore.CYAN)
 
@@ -228,19 +192,30 @@ def rm_lib(path, name):
 
     writeln('done')
     writeln('Libraries left are: ' + ' '.join(config_data['libraries-qt']), color=Fore.YELLOW)
+    writeln('#################################################################################')
     writeln('Updating CMake files: ', color=Fore.CYAN)
     creation.update(path)
+
+
+def list_libs(path):
+    """list Qt library used for the project"""
+
+    path = get_valid_path(path)
+
+    writeln('Libraries used in the projects:', color=Fore.YELLOW)
+
+    # load config file as json
+    with open(path + '/config.json') as f:
+        config_data = json.load(f, object_pairs_hook=OrderedDict)
+
+    for lib in config_data['libraries-qt']:
+        writeln(lib, color=Fore.CYAN)
 
 
 def run(path, generator=None, cmake=None, make=None):
     """open the binary executable file"""
 
-    if path is None:
-        path = get_working_directory()
-    else:
-        path = linux_path(os.path.abspath(path))
-
-    verify_path(path)
+    path = get_valid_path(path)
 
     build(path, generator, cmake, make)
 
@@ -248,8 +223,6 @@ def run(path, generator=None, cmake=None, make=None):
         config_data = json.load(f)
 
     executable = config_data['name-project']
-
-    write('Running the ' + executable + ' project', color=Fore.YELLOW)
 
     if get_platform() == 'OS X':
         subprocess.call(['open', path + '/bin/' + executable + '.app'])
@@ -262,14 +235,9 @@ def run(path, generator=None, cmake=None, make=None):
 def list_qml(path):
     """list qml files in the project"""
 
-    if path is None:
-        path = get_working_directory()
-    else:
-        path = linux_path(os.path.abspath(path))
+    path = get_valid_path(path)
 
-    verify_path(path)
-
-    if not os.path.exists(path + '/wqt/quick'):
+    if get_qt_application(path) == 'quick':
         writeln('This project is not a Qt Quick project so no qml files', color=Fore.YELLOW)
         quit(2)
 
@@ -284,12 +252,7 @@ def list_qml(path):
 def preview_qml(path, name):
     """preview qml file"""
 
-    if path is None:
-        path = get_working_directory()
-    else:
-        path = linux_path(os.path.abspath(path))
-
-    verify_path(path)
+    path = get_valid_path(path)
 
     if not os.path.exists(path + '/wqt/quick'):
         writeln('This project is not a Qt Quick project so no qml preview :(', color=Fore.YELLOW)
@@ -302,4 +265,10 @@ def preview_qml(path, name):
     elif os.path.exists(path + '/res/qml/' + name + '.qml'):
         qml_path = path + '/res/qml/' + name + '.qml'
 
-    subprocess.call(['qmlscene', qml_path])
+    if get_qmlscene_program():
+        subprocess.call(['qmlscene', qml_path])
+    elif get_qmlviewer_program():
+        subprocess.call(['qmlviewer', qml_path])
+    else:
+        writeln('No Qml viewer program install please install qmlscene or qmlviewer', color=Fore.RED)
+        quit(2)

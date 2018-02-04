@@ -2,7 +2,7 @@
 Parses and completes the cmake templates
 """
 
-from utils import helper
+from wqt.utils import helper
 
 
 def parse_update(tpl_path, project_data):

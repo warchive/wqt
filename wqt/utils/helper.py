@@ -3,10 +3,64 @@ Helper functions to be used through the tool
 """
 
 import os
-from os.path import abspath, dirname
+import sys
 import shutil
+from os.path import abspath, dirname
+from colorama import Fore
+from .output import writeln
 
 from six import string_types
+
+
+def get_platform():
+    """Returns the operating system"""
+
+    platforms = {
+        'linux1': 'Linux',
+        'linux2': 'Linux',
+        'darwin': 'OS X',
+        'win32': 'Windows'
+    }
+    if sys.platform not in platforms:
+        return sys.platform
+
+    return platforms[sys.platform]
+
+
+def verify_path(path):
+    """check if the project path is correct"""
+
+    if not os.path.exists(path) or not os.path.isdir(path):
+        writeln('Path specified for project creation does not exist or is not a directory', color=Fore.RED)
+        quit(2)
+
+
+def get_valid_path(path):
+    """gets the project path based on if it is provided or not"""
+
+    if path is None:
+        path = get_working_directory()
+    else:
+        path = linux_path(os.path.abspath(path))
+
+    verify_path(path)
+
+    return path
+
+
+def get_qt_application(path):
+    """returns the type of qt application"""
+
+    if os.path.exists(path + '/wqt/console'):
+        application = 'console'
+    elif os.path.exists(path + '/wqt/quick'):
+        application = 'quick'
+    elif os.path.exists(path + '/wqt/widgets'):
+        application = 'widgets'
+    else:
+        application = None
+
+    return application
 
 
 def quote_join(values):
