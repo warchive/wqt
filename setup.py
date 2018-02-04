@@ -20,12 +20,12 @@ def package_files(directory):
 
 setup(
     name='WQt',
-    version='1.0.4',
+    version='1.0.5',
     description='Create, Build, and Run Qt Projects',
     author='Deep Dhillon',
     author_email='deep@deepdhillon.ca',
     url='https://github.com/dhillondeep/wqt',  # use the URL to the github repo
-    long_description=open('README.rst').read(),
+    long_description=open('doc/README.rst').read(),
     license='MIT',
     packages=find_packages(),
     install_requires=install_requires,
