@@ -1,0 +1,16 @@
+dist: trusty
+language: python
+before_install:
+  - sudo apt-get update -qq
+install:
+  - pip install --upgrade pip
+  - pip install tox
+  - pip install --upgrade flake8
+  - pip install six
+script:
+  - tox
+  - cd toolchain
+  - mkdir cmake-build-debug
+  - cd cmake-build-debug
+  - cmake ../
+  - make

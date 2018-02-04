@@ -14,6 +14,16 @@ cmake_programs = [
     'cmake.exe',
 ]
 
+qmlscene_program = [
+    'qmlscene',
+    'qmlscene.exe'
+]
+
+qmlviewer_program = [
+    'qmlviewer',
+    'qmlviewer.exe'
+]
+
 
 @memoized
 def cmd_exists(cmd):
@@ -47,3 +57,13 @@ def get_make_program():
 @memoized
 def get_cmake_program():
     return get_program(cmake_programs)
+
+
+@memoized
+def get_qmlscene_program():
+    return get_program(qmlscene_program)
+
+
+@memoized
+def get_qmlviewer_program():
+    return get_program(qmlviewer_program)

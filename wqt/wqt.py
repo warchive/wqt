@@ -6,9 +6,10 @@ from __future__ import absolute_import
 
 import argparse
 
-from command import creation, handle
-from utils.output import writeln, write
 from colorama import Fore
+
+from wqt.command import creation, handle
+from wqt.utils.output import writeln
 
 
 def parse():
@@ -98,6 +99,8 @@ def main():
         handle.run(path, generator, cmake, make)
     elif 'list-qml' in options.action:
         handle.list_qml(path)
+    elif 'list-libs' in options.action:
+        handle.list_libs(path)
     elif 'preview-qml' in options.action:
         if len(options.action) < 2:
             writeln('Specify the name of the qml file to preview', color=Fore.RED)
