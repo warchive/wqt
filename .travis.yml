@@ -1,0 +1,26 @@
+dist: trusty
+language: python
+before_install:
+  - sudo apt-get update -qq
+install:
+  - wget http://download.qt.io/official_releases/qt/5.10/5.10.0/qt-opensource-linux-x64-5.10.0.run
+  - chmod +x qt-opensource-linux-x64-5.10.0.run
+  - ./qt-opensource-linux-x64-5.10.0.run
+  - sudo apt-get install build-essential
+  - sudo apt-get install libfontconfig1
+  - sudo apt-get install mesa-common-dev
+  - sudo apt-get install software-properties-common
+  - sudo add-apt-repository ppa:george-edison55/cmake-3.x
+  - sudo apt-get update
+  - sudo apt-get install cmake
+  - pip install --upgrade pip
+  - pip install tox
+  - pip install --upgrade flake8
+  - pip install six
+script:
+  - tox
+  - cd toolchain
+  - mkdir cmake-build-debug
+  - cd cmake-build-debug
+  - cmake ../
+  - make

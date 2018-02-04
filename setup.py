@@ -19,12 +19,14 @@ def package_files(directory):
 
 
 setup(
+    setup_requires=['setuptools-markdown'],
     name='WQt',
-    version='1.0.0',
+    version='1.0.1',
     description='Create, Build, and Run Qt Projects',
     author='Deep Dhillon',
     author_email='deep@deepdhillon.ca',
-    # long_description=open('README.md').read(),
+    url='https://github.com/dhillondeep/wqt',  # use the URL to the github repo
+    long_description_markdown_filename='README.md',
     license='MIT',
     packages=find_packages(),
     install_requires=install_requires,
@@ -38,8 +40,7 @@ setup(
         ],
     },
     classifiers=[
-        'Development Status :: 4 - Beta',
-        'License :: MIT'
+        'Development Status :: 4 - Beta'
     ],
     keywords=[
         'qt', 'c++', 'cmake', 'make', 'tool'
