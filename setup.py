@@ -20,7 +20,7 @@ def package_files(directory):
 
 setup(
     name='WQt',
-    version='1.0.6',
+    version='1.0.9',
     description='Create, Build, and Run Qt Projects',
     author='Deep Dhillon',
     author_email='deep@deepdhillon.ca',

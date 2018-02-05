@@ -14,7 +14,7 @@ add_definitions(-I/${CMAKE_CURRENT_SOURCE_DIR}/lib)
 # project directories
 set(ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(SOURCE_DIR ${ROOT_DIR}/src)
-set(BUILD_DIR ${ROOT_DIR}/build)
+set(BUILD_DIR ${ROOT_DIR}/wqt/build)
 set(BIN_DIR ${ROOT_DIR}/bin)
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/install)
 set(PROJECT_INSTALL_DIR ${CMAKE_INSTALL_PREFIX})
