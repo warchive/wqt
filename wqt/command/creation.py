@@ -176,6 +176,30 @@ def create(path, application):
     writeln('Qt project created', color=Fore.YELLOW)
 
 
+def update_config_file(app_path, toolchain_path):
+    # get data from current config file
+    with open(app_path + '/config.json') as f:
+        app_config_data = json.load(f, object_pairs_hook=OrderedDict)
+
+    # get data from the platform template path
+    if get_platform() == 'OS X':
+        template_config_path = toolchain_path + '/config/config-apple.json.tpl'
+    else:
+        template_config_path = toolchain_path + '/config/config.json.tpl'
+
+    with open(template_config_path) as f:
+        template_config_data = json.load(f, object_pairs_hook=OrderedDict)
+
+    # add the missing keys
+    for key in template_config_data:
+        if key not in app_config_data:
+            app_config_data[key] = template_config_data[key]
+
+    # write new config to the app config file
+    with open(app_path + '/config.json', 'w') as f:
+        json.dump(app_config_data, f, indent=2)
+
+
 def update(path):
     """Updates existing WQt project"""
 
@@ -201,6 +225,8 @@ def update(path):
 
     if not os.path.exists(path + '/config.json'):
         copy_config_template_file(templates_path, path)
+    else:
+        update_config_file(path, templates_path)
 
     if not os.path.exists(path + '/gitignore'):
         copyfile(templates_path + '/gitignore.tpl', path + '/.gitignore')
