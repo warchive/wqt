@@ -140,7 +140,7 @@ def create(path, application):
     copy_tree(toolchain_path + '/helper', path + '/wqt/helper')
     copy_cmake_template_file(templates_path, path)
     copy_config_template_file(templates_path, path)
-    copyfile(templates_path + '/.gitignore.tpl', path + '/.gitignore')
+    copyfile(templates_path + '/gitignore.tpl', path + '/.gitignore')
     copyfile(templates_path + '/readme/app-README.md.tpl', path + '/src/app/README.md')
     copyfile(templates_path + '/readme/lib-README.md.tpl', path + '/lib/README.md')
 
@@ -202,8 +202,8 @@ def update(path):
     if not os.path.exists(path + '/config.json'):
         copy_config_template_file(templates_path, path)
 
-    if not os.path.exists(path + '/.gitignore'):
-        copyfile(templates_path + '/.gitignore.tpl', path + '/.gitignore')
+    if not os.path.exists(path + '/gitignore'):
+        copyfile(templates_path + '/gitignore.tpl', path + '/.gitignore')
 
     if not os.path.exists(path + '/src/app/README.mod'):
         copyfile(templates_path + '/readme/app-README.md.tpl', path + '/src/app/README.md')
