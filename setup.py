@@ -20,7 +20,7 @@ def package_files(directory):
 
 setup(
     name='WQt',
-    version='1.0.5',
+    version='1.0.6',
     description='Create, Build, and Run Qt Projects',
     author='Deep Dhillon',
     author_email='deep@deepdhillon.ca',
@@ -30,7 +30,7 @@ setup(
     packages=find_packages(),
     install_requires=install_requires,
     package_data={
-        '': package_files('toolchain') + package_files('templates'),
+        '': package_files('toolchain') + package_files('templates') + package_files('doc'),
         'wqt': ['*.json'],
     },
     entry_points={
