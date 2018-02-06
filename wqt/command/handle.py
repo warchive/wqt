@@ -19,6 +19,7 @@ from wqt.utils.finder import (
 )
 from wqt.utils.helper import (
     get_files,
+    get_files_recursively,
     get_dirs,
     get_valid_path,
     get_platform,
@@ -26,6 +27,96 @@ from wqt.utils.helper import (
 )
 from wqt.utils.output import writeln, write
 from . import creation
+
+
+def get_usage(text, path):
+    """Returns the code file where the resource is used"""
+
+    list_usage = []
+    for file in get_files_recursively(path + '/src/app'):
+        with open(file) as f:
+            for line in f:
+                if text in line:
+                    list_usage.append(file)
+
+    return list_usage
+
+
+def create_tracker(path):
+    """Creates the tracker file"""
+
+    tree_data = {}
+
+    for i in get_files_recursively(path + '/res', ['.qml']):
+        extension = os.path.splitext(i)[1]
+        name_path = os.path.splitext(i)[0]
+
+        tree_data[name_path + extension] = os.path.getmtime(name_path + extension)
+
+    with open(path + '/wqt/tracker.json', 'w') as f:
+        json.dump(tree_data, f, indent=2)
+
+
+def update_tracker_and_action(path):
+    """updates the tracker file and take actions"""
+
+    if not os.path.exists(path + '/wqt/tracker.json'):
+        created = True
+        create_tracker(path)
+    else:
+        created = False
+
+    with open(path + '/wqt/tracker.json') as f:
+        tree_data = json.load(f)
+
+    if os.path.exists(path + '/wqt/temp.txt'):
+        os.remove(path + '/wqt/temp.txt')
+
+    num_res_files = get_files_recursively(path + '/res', ['.qml'])
+    num_entries = len(tree_data)
+
+    if num_res_files != num_entries:
+        create_tracker(path)
+        created = True
+
+    for key in tree_data:
+        curr_last_modified = os.path.getmtime(key)
+        last_modified = tree_data[key]
+
+        if curr_last_modified > last_modified or created:
+            usage_file_path = get_usage(os.path.basename(key), path)
+
+            for file_path in usage_file_path:
+                with open(file_path, 'a') as curr_file:
+                    curr_file.write('#')
+
+                with open(path + '/wqt/temp.txt', 'a') as temp_file:
+                    temp_file.write(file_path)
+
+            tree_data[key] = curr_last_modified
+
+    with open(path + '/wqt/tracker.json', 'w') as f:
+        json.dump(tree_data, f, indent=2)
+
+    remove_action(path)
+
+    return tree_data
+
+
+def remove_action(path):
+    """removes the extra action to trigger build"""
+
+    if os.path.exists(path + '/wqt/temp.txt'):
+        with open(path + '/wqt/temp.txt') as read_file:
+            for line in read_file.readlines():
+                print(line)
+                with open(line) as read_code_file:
+                    lines = read_code_file.readlines()
+
+                with open(line, 'w') as write_code_file:
+                    write_code_file.writelines([item for item in lines[:-1]])
+
+        os.remove(path + '/wqt/temp.txt')
 
 
 def build(path, generator=None, make=None, cmake=None):
@@ -59,6 +150,9 @@ def build(path, generator=None, make=None, cmake=None):
         os.mkdir(path + '/wqt/build')
 
     os.chdir(path + '/wqt/build')
+
+    # check modifications to resource files
+    update_tracker_and_action(path)
 
     cmake_program = cmake or get_cmake_program()
     make_program = make or get_make_program()
@@ -94,8 +188,6 @@ def build(path, generator=None, make=None, cmake=None):
         quit(2)
 
     writeln('Project successfully built', Fore.YELLOW)
-
-    pass
 
 
 def clean(path):
