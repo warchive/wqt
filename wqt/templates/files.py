@@ -17,6 +17,19 @@ class QType:
     WIDGETS = "widgets"
     CONSOLE = "console"
 
+    @staticmethod
+    def get_type(string):
+        """Returns enum for the type string"""
+
+        if string == QType.QUICK:
+            return QType.QUICK
+        elif string == QType.WIDGETS:
+            return QType.WIDGETS
+        elif string == QType.CONSOLE:
+            return QType.CONSOLE
+        else:
+            return None
+
 
 def __get_cmake_quick(os):
     """Based on the OS return the quick cmake template"""

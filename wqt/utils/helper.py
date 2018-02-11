@@ -3,10 +3,12 @@ Helper functions to be used through the tool
 """
 
 import os
-import sys
 import shutil
+import sys
 from os.path import abspath, dirname
+
 from colorama import Fore
+
 from .output import writeln
 
 
@@ -54,21 +56,6 @@ def get_valid_path(path):
     return path
 
 
-def get_qt_application(path):
-    """returns the type of qt application"""
-
-    if os.path.exists(path + '/wqt/console'):
-        application = 'console'
-    elif os.path.exists(path + '/wqt/quick'):
-        application = 'quick'
-    elif os.path.exists(path + '/wqt/widgets'):
-        application = 'widgets'
-    else:
-        application = None
-
-    return application
-
-
 def quote_join(values):
     """Join a set of strings, presumed to be file paths, surrounded by quotes, for CMake"""
 
@@ -103,7 +90,7 @@ def get_working_directory():
     return linux_path(os.path.abspath(os.getcwd()))
 
 
-def any_folders_exist(folders):
+def any_folders_exist(*folders):
     """checks if given folders exist in path"""
 
     for folder in folders:

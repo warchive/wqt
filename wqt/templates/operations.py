@@ -4,8 +4,9 @@ This file helps perform operations on template files
 
 import os
 import sys
-import pystache
+from shutil import copyfile
 
+import pystache
 
 from wqt.templates.files import (
     QType,
@@ -20,7 +21,6 @@ from wqt.utils.helper import (
     OS,
     create_folder
 )
-from shutil import copyfile
 
 if sys.version_info < (3, 0):
     import ConfigParser as configparser

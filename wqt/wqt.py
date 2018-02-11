@@ -9,6 +9,7 @@ import argparse
 from colorama import Fore
 
 from wqt.command import creation, handle
+from wqt.templates.files import QType
 from wqt.utils.output import writeln
 
 
@@ -48,10 +49,10 @@ def provided(*args):
         return True
 
 
-def verify_qt_application(name):
+def verify_qt_application(qt_type):
     """verifies if the type of Qt application is supported"""
 
-    if name != 'quick' and name != 'widgets' and name != 'console':
+    if qt_type is None:
         writeln('Invalid Qt application specified', color=Fore.RED)
         quit(2)
 
@@ -73,8 +74,10 @@ def main():
             writeln('Specify a type of Qt application to create', color=Fore.RED)
             quit(2)
 
-        verify_qt_application(options.action[1])
-        creation.create(path, options.action[1])
+        qt_type = QType.get_type(options.action[1])
+
+        verify_qt_application(qt_type)
+        creation.create(path, qt_type)
     elif 'update' in options.action:
         creation.update(path)
     elif 'build' in options.action:

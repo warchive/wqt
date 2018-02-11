@@ -4,15 +4,8 @@ Handle creation, and update of WQt projects
 
 from colorama import Fore
 
-from wqt.utils.helper import (
-    any_folders_exist,
-    get_files,
-    get_dirs,
-    get_valid_path,
-)
-from wqt.utils.output import (
-    writeln,
-    write
+from wqt.command.resource import (
+    get_qt_type
 )
 from wqt.templates.operations import (
     fill_and_copy_config,
@@ -24,8 +17,15 @@ from wqt.templates.operations import (
 from wqt.toolchain.operations import (
     copy_toolchain_files
 )
-from wqt.command.resource import (
-    get_qt_type
+from wqt.utils.helper import (
+    any_folders_exist,
+    get_files,
+    get_dirs,
+    get_valid_path,
+)
+from wqt.utils.output import (
+    writeln,
+    write
 )
 
 
@@ -36,7 +36,7 @@ def create(path, application):
 
     # check if there are files in the folder
     if get_dirs(path) or get_files(path):
-        if any_folders_exist([path + '/src', path + '/lib', path + '/res']):
+        if any_folders_exist(path + '/src', path + '/lib', path + '/res'):
             writeln('There is already a src/lib/res folder in this directory. Use wqt update instead',
                     color=Fore.RED)
             quit(2)

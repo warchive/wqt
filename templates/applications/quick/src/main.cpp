@@ -1,6 +1,5 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
-#include <ResourceManager.h>
 
 int main(int argc, char *argv[]) {
 #if defined(Q_OS_WIN)
@@ -9,10 +8,8 @@ int main(int argc, char *argv[]) {
 
     QGuiApplication app(argc, argv);
 
-    auto literal = getResource("qml/main.qml");
-
     QQmlApplicationEngine engine;
-    engine.load(QUrl(literal));
+    engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     if (engine.rootObjects().isEmpty())
         return -1;
 
