@@ -7,9 +7,7 @@ import shutil
 import sys
 from os.path import abspath, dirname
 
-from colorama import Fore
-
-from .output import writeln
+from wqt.utils.output import error
 
 
 class OS:
@@ -39,8 +37,7 @@ def verify_path(path):
     """check if the project path is correct"""
 
     if not os.path.exists(path) or not os.path.isdir(path):
-        writeln('Path specified for project creation does not exist or is not a directory', color=Fore.RED)
-        quit(2)
+        error('Path specified for project creation does not exist or is not a directory')
 
 
 def get_valid_path(path):
@@ -176,3 +173,15 @@ def get_dirnames(path):
             arr.append(os.path.basename(linux_path(path + '/' + file)))
 
     return arr
+
+
+def copyfile(src, dest, same_name=False, override=False):
+    """Copies a file from one location to another, gives an option to override or not"""
+
+    if same_name:
+        dest = linux_path(dest + '/' + os.path.basename(src))
+
+    if os.path.exists(dest) and not override:
+        return
+
+    shutil.copyfile(src, dest)

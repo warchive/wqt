@@ -8,6 +8,10 @@ import subprocess
 
 from colorama import Fore
 
+from wqt.command import creation
+from wqt.command.creation import (
+    update
+)
 from wqt.command.resource import (
     get_configuration,
     set_configuration
@@ -28,8 +32,11 @@ from wqt.utils.helper import (
     any_folders_exist,
     OS
 )
-from wqt.utils.output import writeln, write
-from . import creation
+from wqt.utils.output import (
+    writeln,
+    write,
+    error
+)
 
 
 def build(path, generator=None, make=None, cmake=None):
@@ -37,10 +44,12 @@ def build(path, generator=None, make=None, cmake=None):
 
     path = get_valid_path(path)
 
+    # update thr project
+    update(path)
+
     # verify there is a wqt folder
     if not any_folders_exist(path + '/wqt'):
-        writeln("build files do not exist (wqt folder), aborting", Fore.RED)
-        quit(2)
+        error("build files do not exist (wqt folder), aborting")
 
     writeln('WQt project build started', Fore.YELLOW)
 
@@ -57,13 +66,11 @@ def build(path, generator=None, make=None, cmake=None):
 
     # check if cmake is in environment paths (unix/linux based systems)
     if not cmake_program:
-        writeln('\ncmake does not exist, please install it or make sure it is in your environment PATH', Fore.RED)
-        quit(2)
+        error('\ncmake does not exist, please install it or make sure it is in your environment PATH')
 
     # check if make is in environment paths (unix/linux based systems)
     if not make_program:
-        writeln('\nmake does not exist, please install it or make sure it is in your environment PATH', Fore.RED)
-        quit(2)
+        error('\nmake does not exist, please install it or make sure it is in your environment PATH')
 
     writeln('done')
 
@@ -74,14 +81,12 @@ def build(path, generator=None, make=None, cmake=None):
     cmake_code = subprocess.call(['cmake', '-G', str(generator), '../..'])
 
     if cmake_code != 0:
-        writeln('Project build unsuccessful, cmake exited with error code ' + str(cmake_code), Fore.RED)
-        quit(2)
+        error('Project build unsuccessful, cmake exited with error code ' + str(cmake_code))
 
     make_code = subprocess.call([make_program])
 
     if make_code != 0:
-        writeln('Project build unsuccessful, make exited with error code ' + str(make_code), Fore.RED)
-        quit(2)
+        error('Project build unsuccessful, make exited with error code ' + str(make_code))
 
     writeln('Project successfully built', Fore.YELLOW)
 
@@ -93,8 +98,7 @@ def clean(path):
 
     # confirm if build folder/path exists
     if not any_folders_exist(path + '/wqt/build'):
-        writeln('No build files to clean', color=Fore.YELLOW)
-        quit(2)
+        error('No build files to clean')
 
     # check if the current build files are for the current board
     # clean and build if boards are different
@@ -140,8 +144,7 @@ def add_lib(path, name):
         libraries += ' ' + name
         set_configuration(path, 'library', 'qt', libraries)
     else:
-        writeln('\nLibrary already exist, libraries are: ' + libraries, color=Fore.RED)
-        quit(2)
+        error('\nLibrary already exist, libraries are: ' + libraries)
 
     writeln('done')
     string_libs = 'Libraries left are: ' + libraries
@@ -168,8 +171,7 @@ def rm_lib(path, name):
         libraries_list.remove(str(name))
         set_configuration(path, 'library', 'qt', ' '.join(libraries_list))
     else:
-        writeln('\nNo such library to remove, libraries are: ' + libraries_list, color=Fore.YELLOW)
-        quit(2)
+        error('\nNo such library to remove, libraries are: ' + libraries_list)
 
     writeln('done')
     string_libs = 'Libraries left are: ' + ' '.join(libraries_list)
@@ -196,12 +198,14 @@ def list_libs(path):
         writeln(lib, color=Fore.CYAN)
 
 
-def run(path, generator=None, cmake=None, make=None):
-    """open the binary executable file"""
+def open(path):
+    """opens the executable file"""
 
     path = get_valid_path(path)
 
-    build(path, generator, cmake, make)
+    if not os.path.exists(path + '/bin/' + get_configuration(path, 'project', 'name')) and \
+            not os.path.exists(path + '/bin/' + get_configuration(path, 'project', 'name') + '.app'):
+        error('No executable available, build the project')
 
     executable = get_configuration(path, 'project', 'name')
     qt_type = get_configuration(path, 'project', 'type')
@@ -218,14 +222,22 @@ def run(path, generator=None, cmake=None, make=None):
         subprocess.call(['./' + path + '/bin/' + executable])
 
 
+def run(path, generator=None, cmake=None, make=None):
+    """builds and executes the binary executable file"""
+
+    path = get_valid_path(path)
+
+    build(path, generator, cmake, make)
+    open(path)
+
+
 def list_qml(path):
     """list qml files in the project"""
 
     path = get_valid_path(path)
 
     if not get_configuration(path, 'project', 'type') == QType.QUICK:
-        writeln('This project is not a Qt Quick project so no qml files', color=Fore.RED)
-        quit(2)
+        error('This project is not a Qt Quick project so no qml files')
 
     writeln('Qml files for this project: ', color=Fore.YELLOW)
     files = get_files(path + '/res/qml')
@@ -241,8 +253,7 @@ def preview_qml(path, name):
     path = get_valid_path(path)
 
     if not get_configuration(path, 'project', 'type') == QType.QUICK:
-        writeln('This project is not a Qt Quick project so no qml preview :(', color=Fore.RED)
-        quit(2)
+        error('This project is not a Qt Quick project so no qml preview :(')
 
     qml_path = ''
 
@@ -256,5 +267,4 @@ def preview_qml(path, name):
     elif get_qmlviewer_program():
         subprocess.call(['qmlviewer', qml_path])
     else:
-        writeln('No Qml viewer program install please install qmlscene or qmlviewer', color=Fore.RED)
-        quit(2)
+        error('No Qml viewer program install please install qmlscene or qmlviewer')

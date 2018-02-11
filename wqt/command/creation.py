@@ -12,7 +12,8 @@ from wqt.templates.operations import (
     parse_and_copy_cmake,
     copy_application_files,
     copy_other_files,
-    verify_project_structure
+    verify_project_structure,
+    update_qml_resources
 )
 from wqt.toolchain.operations import (
     copy_toolchain_files
@@ -25,7 +26,8 @@ from wqt.utils.helper import (
 )
 from wqt.utils.output import (
     writeln,
-    write
+    write,
+    error
 )
 
 
@@ -37,9 +39,7 @@ def create(path, application):
     # check if there are files in the folder
     if get_dirs(path) or get_files(path):
         if any_folders_exist(path + '/src', path + '/lib', path + '/res'):
-            writeln('There is already a src/lib/res folder in this directory. Use wqt update instead',
-                    color=Fore.RED)
-            quit(2)
+            error('There is already a src/lib/res folder in this directory. Use wqt update instead')
 
     writeln('Creating Qt ' + application + ' project', color=Fore.YELLOW)
     write('Copying required files and applying configuration - ', color=Fore.CYAN)
@@ -62,8 +62,7 @@ def update(path):
     qt_type = get_qt_type(path)
 
     if qt_type is None:
-        writeln('Cannot determine project Qt type, recreate the project!', Fore.RED)
-        quit(2)
+        error('Cannot determine project Qt type, recreate the project!')
 
     writeln('Updating Wqt ' + qt_type + ' project', color=Fore.YELLOW)
     write('Updating Qt work environment - ', color=Fore.CYAN)
@@ -72,6 +71,7 @@ def update(path):
     fill_and_copy_config(qt_type, path, True)
     parse_and_copy_cmake(qt_type, path)
     copy_toolchain_files(path)
+    update_qml_resources(path)
 
     writeln('done')
     writeln('Qt project updated', color=Fore.YELLOW)
