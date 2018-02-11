@@ -13,9 +13,9 @@ from wqt.utils.helper import (
 class QType:
     """Type of Qt application"""
 
-    QUICK = 0
-    WIDGETS = 1
-    CONSOLE = 2
+    QUICK = "quick"
+    WIDGETS = "widgets"
+    CONSOLE = "console"
 
 
 def __get_cmake_quick(os):

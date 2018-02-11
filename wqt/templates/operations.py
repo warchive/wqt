@@ -2,13 +2,19 @@
 This file helps perform operations on template files
 """
 
+import os
 import sys
+import pystache
+
+from wqt.templates.files import (
+    get_config_file,
+    get_cmake_file
+)
+
 if sys.version_info < (3, 0):
     import ConfigParser as configparser
 else:
     import configparser
-
-import pystache
 
 
 def __ini_to_dictionary(config_file):
@@ -26,9 +32,11 @@ def __ini_to_dictionary(config_file):
     return dictionary
 
 
-def parse_and_copy_cmake(cmake_file, path, config_file):
+def parse_and_copy_cmake(qt_type, path):
     """Parses template cmake files and fill them with info from config files"""
 
+    config_file = get_config_file(qt_type)
+    cmake_file = get_cmake_file(qt_type)
     config_dict = __ini_to_dictionary(config_file)
 
     # update config with link library string
@@ -51,5 +59,27 @@ def parse_and_copy_cmake(cmake_file, path, config_file):
 
     filled_data = pystache.render(template_data, config_dict)
 
-    with open(path, 'w') as f:
+    with open(path + '/CMakeLists.txt', 'w') as f:
         f.write(filled_data)
+
+
+def fill_and_copy_config(qt_type, path):
+    """fills the essential config information and writes the config file"""
+
+    config_file = get_config_file(qt_type)
+    project_name = os.path.basename(path)
+
+    config = configparser.ConfigParser()
+    config.read(config_file)
+    config.set('project', 'name', project_name)
+    config.set('project', 'type', qt_type)
+
+    with open(path + '/properties.ini', 'w') as f:
+        config.write(f)
+
+    # remove 2 extra spaces at the end
+    with open(path + '/properties.ini') as f:
+        data = ''.join(f.readlines())
+
+    with open(path + '/properties.ini', 'w') as f:
+        f.write(data.strip().strip('\n'))
