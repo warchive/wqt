@@ -6,6 +6,23 @@ update, build, and run Qt projects from command line. It uses CMake to
 build the project, hence making it compatible with almost any text
 editor and IDE.
 
+Install
+-------
+
+Install from pip:
+
+::
+
+    pip install wqt
+
+Clone the repo and install using setup tools
+
+::
+
+    git clone https://www.github.com/waterloop/wqt
+    cd wqt
+    python setup.py install
+
 Prerequisites
 -------------
 
@@ -32,7 +49,7 @@ should be avoided.
 
 ::
 
-    wqt create
+    wqt create <qt type>
 
 The command above is used to create a project structure. This will
 initialize the project will add template files to get the user started.
@@ -53,37 +70,38 @@ structure is as follow:
             cmake/
             helper/
         .gitignore
-        config.json
+        properties.ini
         CMakeLists.txt
 
 Configurations and Updates
 --------------------------
 
 Every project needs to have some way of configuring properties and this
-is why there is a ``config.json`` file in every ``WQt`` project. This
+is why there is a ``properties.ini`` file in every ``WQt`` project. This
 file is very important because it contains critical information need to
 make the ``build``, and ``run`` possible. This configuration file is
 different based on which machine the project is created on. Config
 files’ templates are:
 
-**Mac OS**
+::
 
-.. figure:: screenshots/config_mac.png
-   :alt: Mac OS config
+    [project]
+    name:
+    type:
 
-   config-mac
+    [version]
+    cxx: 11
+    qt: 5.10.0
+    cmake: 2.8.0
 
-**Windows and Linux**
-
-.. figure:: screenshots/config_others.png
-   :alt: Mac OS config
-
-   config-mac
+    [library]
+    qt: Core Quick
+    user:
 
 Looking at these configuration files, you can see that the fields are
 defined without user needed to change them. This is done because we
 wanted to have a system where the user ``creates`` the project and then
-it runs ``immediately``. The ``name-project`` field is automatically
+it runs ``immediately``. The ``project -> name`` field is automatically
 filled with the name of the project folder. Mac OS needs a bit more
 information to create a ``.app`` file and hence extra fields are
 provided in the configuration file. **Note: These fields can be modified
@@ -98,9 +116,9 @@ is used
 
 This command updates the ``CMakeLists.txt`` file and makes necessary
 changes to the project based on the ``config.json`` properties. This
-command is a must run for the new configurations to be accepted. ** Note:
+command is a must run for the new configurations to be accepted. **Note:
 it is useful to run his command after cloning a WQt project repo to have
-it customized according to your machine. **
+it customized according to your machine.**
 
 Building the project
 --------------------
@@ -175,6 +193,16 @@ without extension.
 Other useful commands and features
 ----------------------------------
 
+``open``
+~~~~~~~~
+
+If an executable is built, this opens that executable. This does not
+build the project.
+
+::
+
+    wqt open
+
 ``list-libs``
 ~~~~~~~~~~~~~
 
@@ -221,3 +249,15 @@ compatible with WQt. It will show the list of those application types.
 ::
 
     wqt list-types
+
+Updates
+-------
+
+-  Version 1.1.1
+
+   -  Replaced ``config.json`` with ``properties.ini``
+   -  Added ``open`` command
+   -  Project also updates when ``build`` is executed
+   -  Handles more error cases
+   -  Separate ``properties`` and ``cmake`` for each OS and qt type
+   -  Resource are handled exactly like Qt Creator does
