@@ -6,10 +6,21 @@ import os
 import sys
 import pystache
 
+
 from wqt.templates.files import (
+    QType,
     get_config_file,
-    get_cmake_file
+    get_cmake_file,
+    get_src_files,
+    get_res_files
 )
+from wqt.utils.helper import (
+    get_wqt_path,
+    get_platform,
+    OS,
+    create_folder
+)
+from shutil import copyfile
 
 if sys.version_info < (3, 0):
     import ConfigParser as configparser
@@ -63,8 +74,11 @@ def parse_and_copy_cmake(qt_type, path):
         f.write(filled_data)
 
 
-def fill_and_copy_config(qt_type, path):
+def fill_and_copy_config(qt_type, path, check=False):
     """fills the essential config information and writes the config file"""
+
+    if check and os.path.exists(path + '/properties.ini'):
+        return
 
     config_file = get_config_file(qt_type)
     project_name = os.path.basename(path)
@@ -83,3 +97,60 @@ def fill_and_copy_config(qt_type, path):
 
     with open(path + '/properties.ini', 'w') as f:
         f.write(data.strip().strip('\n'))
+
+
+def copy_application_files(qt_type, path):
+    """Copy template application files to get user started"""
+
+    # copy source files
+    src_files = get_src_files(qt_type)
+
+    for file in src_files:
+        copyfile(file, path + '/src/' + os.path.basename(path) + '/' + os.path.basename(file))
+
+    # copy res files
+    res_files = get_res_files(qt_type, ['.qml', '.ui', '.qrc'])
+
+    for file in res_files:
+        if qt_type == QType.WIDGETS:
+            copyfile(file, path + '/res/ui/' + os.path.basename(file))
+        elif qt_type == QType.QUICK:
+            copyfile(file, path + '/res/qml/' + os.path.basename(file))
+
+    # copy icon files
+    if get_platform() == OS.mac and (qt_type == QType.QUICK or qt_type == QType.WIDGETS):
+        copyfile(get_wqt_path() + '/templates/applications/icon.icns', path + '/res/icons/icon.icns')
+
+
+def copy_other_files(path):
+    """Copy left over files to complete the project"""
+
+    # copy readme files
+    copyfile(get_wqt_path() + '/templates/readme/app-README.md.tpl',
+             path + '/src/' + os.path.basename(path) + '/README.md')
+    copyfile(get_wqt_path() + '/templates/readme/lib-README.md.tpl',
+             path + '/lib' + '/README.md')
+
+    # copy gitignore file
+    copyfile(get_wqt_path() + '/templates/applications/gitignore.tpl',
+             path + '/.gitignore')
+
+
+def verify_project_structure(project_path, qt_type, override):
+    """Verify if project has a proper structure, otherwise make a proper structure"""
+
+    create_folder(project_path + '/src', override)
+    create_folder(project_path + '/src/' + os.path.basename(project_path), override)
+    create_folder(project_path + '/lib', override)
+    create_folder(project_path + '/wqt', override)
+
+    if qt_type == QType.WIDGETS or qt_type == QType.QUICK:
+        create_folder(project_path + '/res', override)
+
+        if get_platform() == OS.mac:
+            create_folder(project_path + '/res/icons', override)
+
+        if qt_type == QType.WIDGETS:
+            create_folder(project_path + '/res/ui', override)
+        else:
+            create_folder(project_path + '/res/qml', override)

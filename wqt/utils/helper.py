@@ -9,8 +9,6 @@ from os.path import abspath, dirname
 from colorama import Fore
 from .output import writeln
 
-from six import string_types
-
 
 class OS:
     mac = 0
@@ -105,23 +103,14 @@ def get_working_directory():
     return linux_path(os.path.abspath(os.getcwd()))
 
 
-def fill_template(string, data):
-    """Fills the template based on the data provided"""
+def any_folders_exist(folders):
+    """checks if given folders exist in path"""
 
-    string = string.replace('\\n', '\n').replace('\\t', '\t')
+    for folder in folders:
+        if os.path.exists(folder):
+            return True
 
-    for key in data:
-        value = str(data[key])
-
-        if isinstance(data[key], list):
-            value = ' '.join(data[key])
-        elif isinstance(data[key], string_types):
-            value = data[key]
-
-        if '{{' + key + '}}' in string:
-            return string.replace('{{' + key + '}}', value)
-
-    return string
+    return False
 
 
 def create_folder(path, override=False):

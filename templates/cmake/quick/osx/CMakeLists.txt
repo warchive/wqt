@@ -56,7 +56,7 @@ set(CMAKE_BUILD_WITH_INSTALL_RPATH false)
 add_sources(${SOURCE_DIR}/${PROJECT_NAME} ${PROJECT_NAME} SOURCE_FILES)
 
 # resource (qml)
-set(QML_RES ${ROOT_DIR}/res/qml.qrc)
+set(QML_RES ${ROOT_DIR}/res/qml/qml.qrc)
 
 # set property
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)

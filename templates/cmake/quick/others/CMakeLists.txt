@@ -43,7 +43,7 @@ add_definitions(-DUSE_INSTALL_TARGET)
 add_sources(${SOURCE_DIR}/${PROJECT_NAME} ${PROJECT_NAME} SOURCE_FILES)
 
 # resource (qml)
-set(QML_RES ${ROOT_DIR}/res/qml.qrc)
+set(QML_RES ${ROOT_DIR}/res/qml/qml.qrc)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${QML_RES})
 target_include_directories(${PROJECT_NAME} PUBLIC ${BUILD_DIR})
