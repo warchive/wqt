@@ -12,17 +12,25 @@ from .output import writeln
 from six import string_types
 
 
+class OS:
+    mac = 0
+    windows = 1
+    linux = 2
+    other = 3
+
+
 def get_platform():
     """Returns the operating system"""
 
     platforms = {
-        'linux1': 'Linux',
-        'linux2': 'Linux',
-        'darwin': 'OS X',
-        'win32': 'Windows'
+        'linux1': OS.linux,
+        'linux2': OS.linux,
+        'darwin': OS.mac,
+        'win32': OS.windows
     }
+
     if sys.platform not in platforms:
-        return sys.platform
+        return OS.other
 
     return platforms[sys.platform]
 

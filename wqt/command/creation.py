@@ -61,18 +61,18 @@ def copy_cmake_template_file(template_path, copy_path):
     """copy cmake template file to the project created"""
 
     if get_platform() == 'OS X':
-        copyfile(template_path + '/cmake/CMakeLists-Apple.txt.tpl', copy_path + '/CMakeLists.txt')
+        copyfile(template_path + '/cmake/CMakeLists.txt', copy_path + '/CMakeLists.txt')
     else:
-        copyfile(template_path + '/cmake/CMakeLists.txt.tpl', copy_path + '/CMakeLists.txt')
+        copyfile(template_path + '/cmake/CMakeLists.txt', copy_path + '/CMakeLists.txt')
 
 
 def copy_config_template_file(template_path, copy_path):
     """copy config template file to the project created"""
 
     if get_platform() == 'OS X':
-        copyfile(template_path + '/config/config-apple.json.tpl', copy_path + '/config.json')
+        copyfile(template_path + '/config/config.json', copy_path + '/config.json')
     else:
-        copyfile(template_path + '/config/config.json.tpl', copy_path + '/config.json')
+        copyfile(template_path + '/config/config.json', copy_path + '/config.json')
 
 
 def copy_application_files(application, templates_path, path):
@@ -183,9 +183,9 @@ def update_config_file(app_path, toolchain_path):
 
     # get data from the platform template path
     if get_platform() == 'OS X':
-        template_config_path = toolchain_path + '/config/config-apple.json.tpl'
+        template_config_path = toolchain_path + '/config/config.json'
     else:
-        template_config_path = toolchain_path + '/config/config.json.tpl'
+        template_config_path = toolchain_path + '/config/config.json'
 
     with open(template_config_path) as f:
         template_config_data = json.load(f, object_pairs_hook=OrderedDict)
