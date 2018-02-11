@@ -46,7 +46,7 @@ def __ini_to_dictionary(config_file):
 def parse_and_copy_cmake(qt_type, path):
     """Parses template cmake files and fill them with info from config files"""
 
-    config_file = get_config_file(qt_type)
+    config_file = path + '/properties.ini'
     cmake_file = get_cmake_file(qt_type)
     config_dict = __ini_to_dictionary(config_file)
 
@@ -78,9 +78,9 @@ def fill_and_copy_config(qt_type, path, check=False):
     """fills the essential config information and writes the config file"""
 
     if check and os.path.exists(path + '/properties.ini'):
-        return
-
-    config_file = get_config_file(qt_type)
+        config_file = path + '/properties.ini'
+    else:
+        config_file = get_config_file(qt_type)
     project_name = os.path.basename(path)
 
     config = configparser.ConfigParser()
