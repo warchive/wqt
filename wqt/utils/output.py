@@ -10,6 +10,7 @@ import sys
 from colorama import (
     init,
     Style,
+    Fore
 )
 
 
@@ -65,3 +66,8 @@ def writeln(string='', color=Style.RESET_ALL):
     print(color, end='')
     print(string, end='')
     print(Style.RESET_ALL)
+
+
+def error(string):
+    writeln(string, Fore.RED)
+    quit(2)

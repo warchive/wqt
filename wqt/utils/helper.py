@@ -3,26 +3,32 @@ Helper functions to be used through the tool
 """
 
 import os
-import sys
 import shutil
+import sys
 from os.path import abspath, dirname
-from colorama import Fore
-from .output import writeln
 
-from six import string_types
+from wqt.utils.output import error
+
+
+class OS:
+    mac = 0
+    windows = 1
+    linux = 2
+    other = 3
 
 
 def get_platform():
     """Returns the operating system"""
 
     platforms = {
-        'linux1': 'Linux',
-        'linux2': 'Linux',
-        'darwin': 'OS X',
-        'win32': 'Windows'
+        'linux1': OS.linux,
+        'linux2': OS.linux,
+        'darwin': OS.mac,
+        'win32': OS.windows
     }
+
     if sys.platform not in platforms:
-        return sys.platform
+        return OS.other
 
     return platforms[sys.platform]
 
@@ -31,8 +37,7 @@ def verify_path(path):
     """check if the project path is correct"""
 
     if not os.path.exists(path) or not os.path.isdir(path):
-        writeln('Path specified for project creation does not exist or is not a directory', color=Fore.RED)
-        quit(2)
+        error('Path specified for project creation does not exist or is not a directory')
 
 
 def get_valid_path(path):
@@ -46,21 +51,6 @@ def get_valid_path(path):
     verify_path(path)
 
     return path
-
-
-def get_qt_application(path):
-    """returns the type of qt application"""
-
-    if os.path.exists(path + '/wqt/console'):
-        application = 'console'
-    elif os.path.exists(path + '/wqt/quick'):
-        application = 'quick'
-    elif os.path.exists(path + '/wqt/widgets'):
-        application = 'widgets'
-    else:
-        application = None
-
-    return application
 
 
 def quote_join(values):
@@ -97,23 +87,14 @@ def get_working_directory():
     return linux_path(os.path.abspath(os.getcwd()))
 
 
-def fill_template(string, data):
-    """Fills the template based on the data provided"""
+def any_folders_exist(*folders):
+    """checks if given folders exist in path"""
 
-    string = string.replace('\\n', '\n').replace('\\t', '\t')
+    for folder in folders:
+        if os.path.exists(folder):
+            return True
 
-    for key in data:
-        value = str(data[key])
-
-        if isinstance(data[key], list):
-            value = ' '.join(data[key])
-        elif isinstance(data[key], string_types):
-            value = data[key]
-
-        if '{{' + key + '}}' in string:
-            return string.replace('{{' + key + '}}', value)
-
-    return string
+    return False
 
 
 def create_folder(path, override=False):
@@ -192,3 +173,15 @@ def get_dirnames(path):
             arr.append(os.path.basename(linux_path(path + '/' + file)))
 
     return arr
+
+
+def copyfile(src, dest, same_name=False, override=False):
+    """Copies a file from one location to another, gives an option to override or not"""
+
+    if same_name:
+        dest = linux_path(dest + '/' + os.path.basename(src))
+
+    if os.path.exists(dest) and not override:
+        return
+
+    shutil.copyfile(src, dest)

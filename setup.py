@@ -6,7 +6,9 @@ from setuptools import find_packages, setup
 
 install_requires = [
     'colorama',
-    'six'
+    'six',
+    'pystache',
+    'xmltodict'
 ]
 
 

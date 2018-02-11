@@ -6,10 +6,9 @@ from __future__ import absolute_import
 
 import argparse
 
-from colorama import Fore
-
 from wqt.command import creation, handle
-from wqt.utils.output import writeln
+from wqt.templates.files import QType
+from wqt.utils.output import error
 
 
 def parse():
@@ -48,12 +47,11 @@ def provided(*args):
         return True
 
 
-def verify_qt_application(name):
+def verify_qt_application(qt_type):
     """verifies if the type of Qt application is supported"""
 
-    if name != 'quick' and name != 'widgets' and name != 'console':
-        writeln('Invalid Qt application specified', color=Fore.RED)
-        quit(2)
+    if qt_type is None:
+        error('Invalid Qt application specified')
 
 
 def main():
@@ -70,11 +68,12 @@ def main():
     # based on the action call scripts
     if 'create' in options.action:
         if len(options.action) < 2:
-            writeln('Specify a type of Qt application to create', color=Fore.RED)
-            quit(2)
+            error('Specify a type of Qt application to create')
 
-        verify_qt_application(options.action[1])
-        creation.create(path, options.action[1])
+        qt_type = QType.get_type(options.action[1])
+
+        verify_qt_application(qt_type)
+        creation.create(path, qt_type)
     elif 'update' in options.action:
         creation.update(path)
     elif 'build' in options.action:
@@ -85,26 +84,25 @@ def main():
         handle.list_types()
     elif 'add-lib' in options.action:
         if len(options.action) < 2:
-            writeln('Specify the name of the library to add', color=Fore.RED)
-            quit(2)
+            error('Specify the name of the library to add')
 
         handle.add_lib(path, options.action[1])
     elif 'rm-lib' in options.action:
         if len(options.action) < 2:
-            writeln('Specify the name of the library to remove', color=Fore.RED)
-            quit(2)
+            error('Specify the name of the library to remove')
 
         handle.rm_lib(path, options.action[1])
     elif 'run' in options.action:
         handle.run(path, generator, cmake, make)
+    elif 'open' in options.action:
+        handle.open(path)
     elif 'list-qml' in options.action:
         handle.list_qml(path)
     elif 'list-libs' in options.action:
         handle.list_libs(path)
     elif 'preview-qml' in options.action:
         if len(options.action) < 2:
-            writeln('Specify the name of the qml file to preview', color=Fore.RED)
-            quit(2)
+            error('Specify the name of the qml file to preview')
 
         handle.preview_qml(path, options.action[1])
 

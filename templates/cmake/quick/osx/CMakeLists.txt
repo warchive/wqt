@@ -1,13 +1,12 @@
-cmake_minimum_required(VERSION {{version-cmake}})
+cmake_minimum_required(VERSION {{version.cmake}})
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/wqt/cmake)
 include(Functions)
 
-set(PROJECT_NAME {{name-project}})
+set(PROJECT_NAME {{project.name}})
 
-project(${PROJECT_NAME})
-set(CMAKE_CXX_STANDARD {{version-c++}})
-add_definitions(-I/${CMAKE_CURRENT_SOURCE_DIR}/wqt/helper)
+project(${PROJECT_NAME} LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD {{version.cxx}})
 add_definitions(-I/${CMAKE_CURRENT_SOURCE_DIR}/src)
 add_definitions(-I/${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
@@ -16,8 +15,6 @@ set(ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(SOURCE_DIR ${ROOT_DIR}/src)
 set(BUILD_DIR ${ROOT_DIR}/wqt/build)
 set(BIN_DIR ${ROOT_DIR}/bin)
-set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/install)
-set(PROJECT_INSTALL_DIR ${CMAKE_INSTALL_PREFIX})
 
 # output directories
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${BIN_DIR})
@@ -31,22 +28,21 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${BIN_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${BIN_DIR})
 
 # meta information
-set(VERSION_MAJOR {{version-major-app}})
-set(VERSION_MINOR {{version-minor-app}})
-set(VERSION_PATCH {{version-patch-app}})
-set(ORGANIZATION {{organization-app}})
-set(DOMAIN {{domain-app}})
+set(VERSION_MAJOR {{meta.major_version}})
+set(VERSION_MINOR {{meta.minor_version}})
+set(VERSION_PATCH {{meta.patch_version}})
+set(ORGANIZATION {{meta.organization}})
+set(DOMAIN {{meta.domain}})
 set(ICON_PATH ${ROOT_DIR}/res/icons)
-set(ICON_NAME {{name-icon-executable}})
+set(ICON_NAME {{meta.icon_name}})
 
 # qt related stuff
-set(QT_VERSION {{version-qt}})
-set(QT_MODULES {{libraries-qt}}) # Core Gui Widgets Quick Qml Concurrent Network DBus PrintSupport)
+set(QT_VERSION {{version.qt}})
+set(QT_MODULES {{library.qt}})
 
 find_package(Qt5 ${QT_VERSION} QUIET CONFIG REQUIRED ${QT_MODULES})
 set(CMAKE_AUTOMOC true)
-set(CMAKE_AUTOUIC true)
-set(CMAKE_AUTOUIC_SEARCH_PATHS ${ROOT_DIR}/res/ui)
+set(CMAKE_AUTORCC ON)
 
 # definitions
 add_definitions(${QT_DEFINITIONS})
@@ -55,11 +51,12 @@ add_definitions(-DUSE_INSTALL_TARGET)
 # apple rpath
 set(CMAKE_SKIP_BUILD_RPATH false)
 set(CMAKE_BUILD_WITH_INSTALL_RPATH false)
-set(CMAKE_INSTALL_RPATH "@executable_path/../Frameworks")
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH true)
 
 # sources
-add_sources(${SOURCE_DIR}/app app SOURCE_FILES)
+add_sources(${SOURCE_DIR}/${PROJECT_NAME} ${PROJECT_NAME} SOURCE_FILES)
+
+# resource (qml)
+set(QML_RES ${ROOT_DIR}/res/qml/qml.qrc)
 
 # set property
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -76,8 +73,7 @@ set(MACOSX_BUNDLE_ICON ${ICON_PATH}/${MACOSX_BUNDLE_ICON_FILE})
 configure_file(${ROOT_DIR}/wqt/cmake/meta.hpp.in ${BUILD_DIR}/meta.hpp)
 configure_file(${ROOT_DIR}/wqt/cmake/info.plist.in ${BUILD_DIR}/info.plist)
 
-
-add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SOURCE_FILES} ${MACOSX_BUNDLE_ICON})
+add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SOURCE_FILES} ${QML_RES} ${MACOSX_BUNDLE_ICON})
 set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${BUILD_DIR}/info.plist)
 target_include_directories(${PROJECT_NAME} PUBLIC ${BUILD_DIR})
 
@@ -88,4 +84,4 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E
         ${BIN_DIR}/${PROJECT_NAME}.app/Contents/resources)
 
 # link
-target_link_libraries(${PROJECT_NAME} {{link-libraries}})
+target_link_libraries(${PROJECT_NAME} {{library.link}})

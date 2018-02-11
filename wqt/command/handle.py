@@ -2,14 +2,21 @@
 Handle building, listing, and showing WQt projects
 """
 
-import json
 import os
 import shutil
 import subprocess
-from collections import OrderedDict
 
 from colorama import Fore
 
+from wqt.command import creation
+from wqt.command.creation import (
+    update
+)
+from wqt.command.resource import (
+    get_configuration,
+    set_configuration
+)
+from wqt.templates.files import QType
 from wqt.utils.finder import (
     get_cmake_program,
     get_generator_for,
@@ -19,104 +26,17 @@ from wqt.utils.finder import (
 )
 from wqt.utils.helper import (
     get_files,
-    get_files_recursively,
     get_dirs,
     get_valid_path,
     get_platform,
-    get_qt_application
+    any_folders_exist,
+    OS
 )
-from wqt.utils.output import writeln, write
-from . import creation
-
-
-def get_usage(text, path):
-    """Returns the code file where the resource is used"""
-
-    list_usage = []
-    for file in get_files_recursively(path + '/src/app'):
-        with open(file) as f:
-            for line in f:
-                if text in line:
-                    list_usage.append(file)
-
-    return list_usage
-
-
-def create_tracker(path):
-    """Creates the tracker file"""
-
-    tree_data = {}
-
-    for i in get_files_recursively(path + '/res', ['.qml']):
-        extension = os.path.splitext(i)[1]
-        name_path = os.path.splitext(i)[0]
-
-        tree_data[name_path + extension] = os.path.getmtime(name_path + extension)
-
-    with open(path + '/wqt/tracker.json', 'w') as f:
-        json.dump(tree_data, f, indent=2)
-
-
-def update_tracker_and_action(path):
-    """updates the tracker file and take actions"""
-
-    if not os.path.exists(path + '/wqt/tracker.json'):
-        created = True
-        create_tracker(path)
-    else:
-        created = False
-
-    with open(path + '/wqt/tracker.json') as f:
-        tree_data = json.load(f)
-
-    if os.path.exists(path + '/wqt/temp.txt'):
-        os.remove(path + '/wqt/temp.txt')
-
-    num_res_files = get_files_recursively(path + '/res', ['.qml'])
-    num_entries = len(tree_data)
-
-    if num_res_files != num_entries:
-        create_tracker(path)
-        created = True
-
-    for key in tree_data:
-        curr_last_modified = os.path.getmtime(key)
-        last_modified = tree_data[key]
-
-        if curr_last_modified > last_modified or created:
-            usage_file_path = get_usage(os.path.basename(key), path)
-
-            for file_path in usage_file_path:
-                with open(file_path, 'a') as curr_file:
-                    curr_file.write('#')
-
-                with open(path + '/wqt/temp.txt', 'a') as temp_file:
-                    temp_file.write(file_path)
-
-            tree_data[key] = curr_last_modified
-
-    with open(path + '/wqt/tracker.json', 'w') as f:
-        json.dump(tree_data, f, indent=2)
-
-    remove_action(path)
-
-    return tree_data
-
-
-def remove_action(path):
-    """removes the extra action to trigger build"""
-
-    if os.path.exists(path + '/wqt/temp.txt'):
-        with open(path + '/wqt/temp.txt') as read_file:
-            for line in read_file.readlines():
-                print(line)
-                with open(line) as read_code_file:
-                    lines = read_code_file.readlines()
-
-                with open(line, 'w') as write_code_file:
-                    write_code_file.writelines([item for item in lines[:-1]])
-
-        os.remove(path + '/wqt/temp.txt')
+from wqt.utils.output import (
+    writeln,
+    write,
+    error
+)
 
 
 def build(path, generator=None, make=None, cmake=None):
@@ -124,35 +44,20 @@ def build(path, generator=None, make=None, cmake=None):
 
     path = get_valid_path(path)
 
+    # update thr project
+    update(path)
+
+    # verify there is a wqt folder
+    if not any_folders_exist(path + '/wqt'):
+        error("build files do not exist (wqt folder), aborting")
+
     writeln('WQt project build started', Fore.YELLOW)
-    write('Verifying project structure - ', Fore.CYAN)
-
-    application = get_qt_application(path)
-
-    valid = False
-    if os.path.exists(path + '/wqt') and os.path.exists(path + '/src') and os.path.exists(path + '/src/app') \
-            and os.path.exists(path + '/res'):
-        if application == 'widgets' and os.path.exists(path + '/res/ui'):
-            valid = True
-        elif application == 'quick' and os.path.exists(path + '/res/qml'):
-            valid = True
-        elif application == 'console':
-            valid = True
-
-    if valid:
-        writeln('done')
-    else:
-        writeln('\nProject structure invalid, update the project', color=Fore.RED)
-        quit(2)
 
     # check if build folder exists and if not make one
-    if not os.path.exists(path + '/wqt/build'):
+    if not any_folders_exist(path + '/wqt/build'):
         os.mkdir(path + '/wqt/build')
 
     os.chdir(path + '/wqt/build')
-
-    # check modifications to resource files
-    update_tracker_and_action(path)
 
     cmake_program = cmake or get_cmake_program()
     make_program = make or get_make_program()
@@ -161,13 +66,11 @@ def build(path, generator=None, make=None, cmake=None):
 
     # check if cmake is in environment paths (unix/linux based systems)
     if not cmake_program:
-        writeln('\ncmake does not exist, please install it or make sure it is in your environment PATH', Fore.RED)
-        quit(2)
+        error('\ncmake does not exist, please install it or make sure it is in your environment PATH')
 
     # check if make is in environment paths (unix/linux based systems)
     if not make_program:
-        writeln('\nmake does not exist, please install it or make sure it is in your environment PATH', Fore.RED)
-        quit(2)
+        error('\nmake does not exist, please install it or make sure it is in your environment PATH')
 
     writeln('done')
 
@@ -178,14 +81,12 @@ def build(path, generator=None, make=None, cmake=None):
     cmake_code = subprocess.call(['cmake', '-G', str(generator), '../..'])
 
     if cmake_code != 0:
-        writeln('Project build unsuccessful, cmake exited with error code ' + str(cmake_code), Fore.RED)
-        quit(2)
+        error('Project build unsuccessful, cmake exited with error code ' + str(cmake_code))
 
     make_code = subprocess.call([make_program])
 
     if make_code != 0:
-        writeln('Project build unsuccessful, make exited with error code ' + str(make_code), Fore.RED)
-        quit(2)
+        error('Project build unsuccessful, make exited with error code ' + str(make_code))
 
     writeln('Project successfully built', Fore.YELLOW)
 
@@ -195,10 +96,9 @@ def clean(path):
 
     path = get_valid_path(path)
 
-    # confirm if bin folder/path exists
-    if not os.path.exists(path + '/wqt/build'):
-        writeln('No build files to clean', color=Fore.YELLOW)
-        quit(2)
+    # confirm if build folder/path exists
+    if not any_folders_exist(path + '/wqt/build'):
+        error('No build files to clean')
 
     # check if the current build files are for the current board
     # clean and build if boards are different
@@ -238,25 +138,22 @@ def add_lib(path, name):
 
     write('Adding library named ' + name + ' - ', color=Fore.CYAN)
 
-    # load config file as json
-    with open(path + '/config.json') as f:
-        config_data = json.load(f, object_pairs_hook=OrderedDict)
+    libraries = get_configuration(path, 'library', 'qt')
 
-    if not str(name) in config_data['libraries-qt']:
-        config_data['libraries-qt'].append(str(name))
+    if not str(name) in libraries.split():
+        libraries += ' ' + name
+        set_configuration(path, 'library', 'qt', libraries)
     else:
-        writeln('\nLibrary already exist, libraries are: ' + ' '.join(config_data['libraries-qt']),
-                color=Fore.YELLOW)
-        quit(2)
-
-    # write the project name to config file
-    with open(path + '/config.json', 'w') as f:
-        json.dump(config_data, f, indent=2)
+        error('\nLibrary already exist, libraries are: ' + libraries)
 
     writeln('done')
-    writeln('Libraries left are: ' + ' '.join(config_data['libraries-qt']), color=Fore.YELLOW)
-    writeln('#################################################################################')
-    writeln('Updating CMake files: ', color=Fore.CYAN)
+    string_libs = 'Libraries left are: ' + libraries
+    writeln(string_libs, color=Fore.YELLOW)
+
+    for i in range(0, len(string_libs)):
+        write('#')
+    writeln('')
+
     creation.update(path)
 
 
@@ -267,25 +164,23 @@ def rm_lib(path, name):
 
     write('Removing library named ' + name + ' - ', color=Fore.CYAN)
 
-    # load config file as json
-    with open(path + '/config.json') as f:
-        config_data = json.load(f, object_pairs_hook=OrderedDict)
+    libraries = get_configuration(path, 'library', 'qt')
+    libraries_list = libraries.split()
 
-    if str(name) in config_data['libraries-qt']:
-        config_data['libraries-qt'].remove(str(name))
+    if str(name) in libraries_list:
+        libraries_list.remove(str(name))
+        set_configuration(path, 'library', 'qt', ' '.join(libraries_list))
     else:
-        writeln('\nNo such library to remove, libraries are: ' + ' '.join(config_data['libraries-qt']),
-                color=Fore.YELLOW)
-        quit(2)
-
-    # write the project name to config file
-    with open(path + '/config.json', 'w') as f:
-        json.dump(config_data, f, indent=2)
+        error('\nNo such library to remove, libraries are: ' + libraries_list)
 
     writeln('done')
-    writeln('Libraries left are: ' + ' '.join(config_data['libraries-qt']), color=Fore.YELLOW)
-    writeln('#################################################################################')
-    writeln('Updating CMake files: ', color=Fore.CYAN)
+    string_libs = 'Libraries left are: ' + ' '.join(libraries_list)
+    writeln(string_libs, color=Fore.YELLOW)
+
+    for i in range(0, len(string_libs)):
+        write('#')
+    writeln('')
+
     creation.update(path)
 
 
@@ -296,32 +191,44 @@ def list_libs(path):
 
     writeln('Libraries used in the projects:', color=Fore.YELLOW)
 
-    # load config file as json
-    with open(path + '/config.json') as f:
-        config_data = json.load(f, object_pairs_hook=OrderedDict)
+    libraries = get_configuration(path, 'library', 'qt')
+    libraries_list = libraries.split()
 
-    for lib in config_data['libraries-qt']:
+    for lib in libraries_list:
         writeln(lib, color=Fore.CYAN)
 
 
+def open(path):
+    """opens the executable file"""
+
+    path = get_valid_path(path)
+
+    if not os.path.exists(path + '/bin/' + get_configuration(path, 'project', 'name')) and \
+            not os.path.exists(path + '/bin/' + get_configuration(path, 'project', 'name') + '.app'):
+        error('No executable available, build the project')
+
+    executable = get_configuration(path, 'project', 'name')
+    qt_type = get_configuration(path, 'project', 'type')
+
+    if get_platform() == OS.mac:
+        if qt_type == QType.CONSOLE:
+            os.system('cls' if os.name == 'nt' else 'clear')
+            subprocess.call([path + '/bin/' + executable])
+            quit(2)
+        subprocess.call(['open', path + '/bin/' + executable + '.app'])
+    elif get_platform() == OS.windows:
+        subprocess.call([path + '/bin/' + executable + '.exe'])
+    else:
+        subprocess.call(['./' + path + '/bin/' + executable])
+
+
 def run(path, generator=None, cmake=None, make=None):
-    """open the binary executable file"""
+    """builds and executes the binary executable file"""
 
     path = get_valid_path(path)
 
     build(path, generator, cmake, make)
-
-    with open(path + '/config.json') as f:
-        config_data = json.load(f)
-
-    executable = config_data['name-project']
-
-    if get_platform() == 'OS X':
-        subprocess.call(['open', path + '/bin/' + executable + '.app'])
-    elif get_platform() == 'Windows':
-        subprocess.call([path + '/bin/' + executable + '.exe'])
-    else:
-        subprocess.call([path + '/bin/' + executable])
+    open(path)
 
 
 def list_qml(path):
@@ -329,9 +236,8 @@ def list_qml(path):
 
     path = get_valid_path(path)
 
-    if get_qt_application(path) == 'quick':
-        writeln('This project is not a Qt Quick project so no qml files', color=Fore.YELLOW)
-        quit(2)
+    if not get_configuration(path, 'project', 'type') == QType.QUICK:
+        error('This project is not a Qt Quick project so no qml files')
 
     writeln('Qml files for this project: ', color=Fore.YELLOW)
     files = get_files(path + '/res/qml')
@@ -346,9 +252,8 @@ def preview_qml(path, name):
 
     path = get_valid_path(path)
 
-    if not os.path.exists(path + '/wqt/quick'):
-        writeln('This project is not a Qt Quick project so no qml preview :(', color=Fore.YELLOW)
-        quit(2)
+    if not get_configuration(path, 'project', 'type') == QType.QUICK:
+        error('This project is not a Qt Quick project so no qml preview :(')
 
     qml_path = ''
 
@@ -362,5 +267,4 @@ def preview_qml(path, name):
     elif get_qmlviewer_program():
         subprocess.call(['qmlviewer', qml_path])
     else:
-        writeln('No Qml viewer program install please install qmlscene or qmlviewer', color=Fore.RED)
-        quit(2)
+        error('No Qml viewer program install please install qmlscene or qmlviewer')
