@@ -1,4 +1,6 @@
-"""This helps in getting template resources based on OS"""
+"""@package templates
+This helps in getting template resources based on OS
+"""
 
 from wqt.utils.helper import (
     OS,
@@ -9,6 +11,8 @@ from wqt.utils.helper import (
 
 
 class QType:
+    """Type of Qt application"""
+
     QUICK = 0
     WIDGETS = 1
     CONSOLE = 2
@@ -16,6 +20,7 @@ class QType:
 
 def __get_cmake_quick(os):
     """Based on the OS return the quick cmake template"""
+
     quick_path = get_wqt_path() + '/templates/cmake/quick'
 
     if os == OS.mac:
@@ -26,6 +31,7 @@ def __get_cmake_quick(os):
 
 def __get_cmake_widgets(os):
     """Based on the OS return the widgets cmake template"""
+
     widgets_path = get_wqt_path() + '/templates/cmake/widgets'
 
     if os == OS.mac:
@@ -56,16 +62,50 @@ def get_cmake_file(qt_type):
         raise ValueError('Type of Qt application not valid')
 
 
-def get_config_file():
+def __get_config_quick(os):
+    """Based on the OS return the quick properties file"""
+
+    quick_path = get_wqt_path() + '/templates/config/quick'
+
+    if os == OS.mac:
+        return quick_path + '/osx/properties.ini'
+    else:
+        return quick_path + '/others/properties.ini'
+
+
+def __get_config_widgets(os):
+    """Based on the OS return the widgets properties file"""
+
+    widgets_path = get_wqt_path() + '/templates/config/widgets'
+
+    if os == OS.mac:
+        return widgets_path + '/osx/properties.ini'
+    else:
+        return widgets_path + '/others/properties.ini'
+
+
+def __get_config_console():
+    """Based on the OS return the console properties file"""
+
+    console_path = get_wqt_path() + '/templates/config/console'
+    return console_path + '/properties.ini'
+
+
+def get_config_file(qt_type):
     """Returns the config file based on the OS"""
 
     os = get_platform()
-    config_path = get_wqt_path() + '/templates/config'
 
-    if os == OS.mac:
-        return config_path + '/osx/config.json'
+    os = get_platform()
+
+    if qt_type == QType.QUICK:
+        return __get_config_quick(os)
+    elif qt_type == QType.WIDGETS:
+        return __get_config_widgets(os)
+    elif qt_type == QType.CONSOLE:
+        return __get_config_console()
     else:
-        return config_path + '/others/config.json'
+        raise ValueError('Type of Qt application not valid')
 
 
 def get_src_files(qt_type):

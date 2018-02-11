@@ -1,12 +1,12 @@
-cmake_minimum_required(VERSION {{version-cmake}})
+cmake_minimum_required(VERSION {{version.cmake}})
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/wqt/cmake)
 include(Functions)
 
-set(PROJECT_NAME {{name-project}})
+set(PROJECT_NAME {{project.name}})
 
 project(${PROJECT_NAME} LANGUAGES CXX)
-set(CMAKE_CXX_STANDARD {{version-c++}})
+set(CMAKE_CXX_STANDARD {{version.cxx}})
 add_definitions(-I/${CMAKE_CURRENT_SOURCE_DIR}/src)
 add_definitions(-I/${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
@@ -28,8 +28,8 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${BIN_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${BIN_DIR})
 
 # qt related stuff
-set(QT_VERSION {{version-qt}})
-set(QT_MODULES {{libraries-qt}})
+set(QT_VERSION {{version.qt}})
+set(QT_MODULES {{library.qt}})
 
 find_package(Qt5 ${QT_VERSION} QUIET CONFIG REQUIRED ${QT_MODULES})
 set(CMAKE_AUTOMOC true)
@@ -47,4 +47,4 @@ add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 target_include_directories(${PROJECT_NAME} PUBLIC ${BUILD_DIR})
 
 # link
-target_link_libraries(${PROJECT_NAME} {{link-libraries}})
+target_link_libraries(${PROJECT_NAME} {{library.link}})

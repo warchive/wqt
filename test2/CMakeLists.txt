@@ -1,12 +1,12 @@
-cmake_minimum_required(VERSION {{version.cmake}})
+cmake_minimum_required(VERSION 2.8.0)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/wqt/cmake)
 include(Functions)
 
-set(PROJECT_NAME {{project.name}})
+set(PROJECT_NAME Hello)
 
 project(${PROJECT_NAME} LANGUAGES CXX)
-set(CMAKE_CXX_STANDARD {{version.cxx}})
+set(CMAKE_CXX_STANDARD 11)
 add_definitions(-I/${CMAKE_CURRENT_SOURCE_DIR}/src)
 add_definitions(-I/${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
@@ -28,21 +28,22 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${BIN_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${BIN_DIR})
 
 # meta information
-set(VERSION_MAJOR {{meta.major_version}})
-set(VERSION_MINOR {{meta.minor_version}})
-set(VERSION_PATCH {{meta.patch_version}})
-set(ORGANIZATION {{meta.organization}})
-set(DOMAIN {{meta.domain}})
+set(VERSION_MAJOR 1)
+set(VERSION_MINOR 0)
+set(VERSION_PATCH 0)
+set(ORGANIZATION Org)
+set(DOMAIN domain)
 set(ICON_PATH ${ROOT_DIR}/res/icons)
-set(ICON_NAME {{meta.icon_name}})
+set(ICON_NAME icon.icns)
 
 # qt related stuff
-set(QT_VERSION {{version.qt}})
-set(QT_MODULES {{library.qt}})
+set(QT_VERSION 5.10.0)
+set(QT_MODULES Core)
 
 find_package(Qt5 ${QT_VERSION} QUIET CONFIG REQUIRED ${QT_MODULES})
 set(CMAKE_AUTOMOC true)
-set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOUIC_SEARCH_PATHS ${ROOT_DIR}/res/ui)
 
 # definitions
 add_definitions(${QT_DEFINITIONS})
@@ -54,9 +55,6 @@ set(CMAKE_BUILD_WITH_INSTALL_RPATH false)
 
 # sources
 add_sources(${SOURCE_DIR}/${PROJECT_NAME} ${PROJECT_NAME} SOURCE_FILES)
-
-# resource (qml)
-set(QML_RES ${ROOT_DIR}/res/qml.qrc)
 
 # set property
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -73,7 +71,7 @@ set(MACOSX_BUNDLE_ICON ${ICON_PATH}/${MACOSX_BUNDLE_ICON_FILE})
 configure_file(${ROOT_DIR}/wqt/cmake/meta.hpp.in ${BUILD_DIR}/meta.hpp)
 configure_file(${ROOT_DIR}/wqt/cmake/info.plist.in ${BUILD_DIR}/info.plist)
 
-add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SOURCE_FILES} ${QML_RES} ${MACOSX_BUNDLE_ICON})
+add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SOURCE_FILES} ${MACOSX_BUNDLE_ICON})
 set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${BUILD_DIR}/info.plist)
 target_include_directories(${PROJECT_NAME} PUBLIC ${BUILD_DIR})
 
@@ -84,4 +82,4 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E
         ${BIN_DIR}/${PROJECT_NAME}.app/Contents/resources)
 
 # link
-target_link_libraries(${PROJECT_NAME} {{library.link}})
+target_link_libraries(${PROJECT_NAME} Qt5::Core)

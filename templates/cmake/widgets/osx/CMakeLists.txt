@@ -1,12 +1,12 @@
-cmake_minimum_required(VERSION {{version-cmake}})
+cmake_minimum_required(VERSION {{version.cmake}})
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/wqt/cmake)
 include(Functions)
 
-set(PROJECT_NAME {{name-project}})
+set(PROJECT_NAME {{project.name}})
 
 project(${PROJECT_NAME} LANGUAGES CXX)
-set(CMAKE_CXX_STANDARD {{version-c++}})
+set(CMAKE_CXX_STANDARD {{version.cxx}})
 add_definitions(-I/${CMAKE_CURRENT_SOURCE_DIR}/src)
 add_definitions(-I/${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
@@ -28,17 +28,17 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${BIN_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${BIN_DIR})
 
 # meta information
-set(VERSION_MAJOR {{version-major-app}})
-set(VERSION_MINOR {{version-minor-app}})
-set(VERSION_PATCH {{version-patch-app}})
-set(ORGANIZATION {{organization-app}})
-set(DOMAIN {{domain-app}})
+set(VERSION_MAJOR {{meta.major_version}})
+set(VERSION_MINOR {{meta.minor_version}})
+set(VERSION_PATCH {{meta.patch_version}})
+set(ORGANIZATION {{meta.organization}})
+set(DOMAIN {{meta.domain}})
 set(ICON_PATH ${ROOT_DIR}/res/icons)
-set(ICON_NAME {{name-icon-executable}})
+set(ICON_NAME {{meta.icon_name}})
 
 # qt related stuff
-set(QT_VERSION {{version-qt}})
-set(QT_MODULES {{libraries-qt}})
+set(QT_VERSION {{version.qt}})
+set(QT_MODULES {{library.qt}})
 
 find_package(Qt5 ${QT_VERSION} QUIET CONFIG REQUIRED ${QT_MODULES})
 set(CMAKE_AUTOMOC true)
@@ -82,4 +82,4 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E
         ${BIN_DIR}/${PROJECT_NAME}.app/Contents/resources)
 
 # link
-target_link_libraries(${PROJECT_NAME} {{link-libraries}})
+target_link_libraries(${PROJECT_NAME} {{library.link}})
